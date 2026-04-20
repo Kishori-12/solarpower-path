@@ -153,7 +153,7 @@ export function Calculator() {
                         border: "1px solid var(--border)",
                         borderRadius: 12,
                       }}
-                      formatter={(v: number) => `₹${v.toLocaleString("en-IN")}`}
+                      formatter={(v) => `₹${Number(v).toLocaleString("en-IN")}`}
                     />
                     <Area
                       type="monotone"
