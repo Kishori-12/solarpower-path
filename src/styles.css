@@ -40,6 +40,14 @@
   --animate-glow: glow 3s ease-in-out infinite;
   --animate-fade-up: fade-up 0.7s ease-out forwards;
   --animate-spin-slow: spin 20s linear infinite;
+  --animate-shimmer: shimmer 2.5s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 3s ease-in-out infinite;
+  --animate-slide-up: slide-up 0.6s ease-out forwards;
+  --animate-slide-in-left: slide-in-left 0.6s ease-out forwards;
+  --animate-slide-in-right: slide-in-right 0.6s ease-out forwards;
+  --animate-bounce-subtle: bounce-subtle 2s ease-in-out infinite;
+  --animate-scale-in: scale-in 0.5s ease-out forwards;
+  --animate-gradient-shift: gradient-shift 6s ease-in-out infinite;
 }
 
 @keyframes float {
@@ -53,6 +61,39 @@
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 143, 0, 0.4); }
+  50% { box-shadow: 0 0 40px rgba(255, 143, 0, 0.8); }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 :root {
@@ -162,6 +203,128 @@
   .bg-gradient-sky { background: var(--gradient-sky); }
   .shadow-glow { box-shadow: var(--shadow-glow); }
   .shadow-soft { box-shadow: var(--shadow-soft); }
-  .hover-lift { transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s; }
-  .hover-lift:hover { transform: translateY(-6px); box-shadow: var(--shadow-glow); }
+  
+  /* Premium hover effects */
+  .hover-lift { 
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease-out;
+  }
+  .hover-lift:hover { 
+    transform: translateY(-6px); 
+    box-shadow: var(--shadow-glow);
+  }
+  
+  /* Enhanced glass morphism variants */
+  .glass-premium {
+    background: color-mix(in oklab, var(--card) 60%, transparent);
+    backdrop-filter: blur(32px) saturate(200%) brightness(110%);
+    -webkit-backdrop-filter: blur(32px) saturate(200%) brightness(110%);
+    border: 2px solid color-mix(in oklab, white 15%, transparent);
+    box-shadow: 0 8px 48px -12px rgb(0 0 0 / 0.15), inset 1px 1px 0 rgb(255 255 255 / 0.2);
+  }
+  
+  .glass-premium-dark {
+    background: color-mix(in oklab, var(--card) 50%, transparent);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    border: 1.5px solid color-mix(in oklab, white 10%, transparent);
+    box-shadow: 0 8px 40px -12px rgb(0 0 0 / 0.2), inset 0 1px 0 rgb(255 255 255 / 0.1);
+  }
+  
+  /* Gradient text utilities */
+  .text-gradient-eco {
+    background: var(--gradient-eco);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .text-gradient-sky {
+    background: var(--gradient-sky);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  /* Premium button styles */
+  .btn-primary {
+    background: var(--gradient-solar);
+    box-shadow: var(--shadow-glow);
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 25px 50px -12px rgba(255, 143, 0, 0.4);
+  }
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+  
+  /* Loading & animation states */
+  .shimmer-loading {
+    background-image: linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--card) 100%, transparent),
+      color-mix(in oklab, var(--card) 85%, transparent),
+      color-mix(in oklab, var(--card) 100%, transparent)
+    );
+    background-size: 1000px 100%;
+    animation: var(--animate-shimmer);
+  }
+  
+  .glow-pulse {
+    animation: var(--animate-pulse-glow);
+  }
+  
+  /* Premium card hover effects */
+  .card-hover {
+    transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    position: relative;
+  }
+  .card-hover:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 25px 50px -12px rgba(255, 143, 0, 0.2);
+  }
+  
+  /* Smooth scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 4px;
+    transition: background 0.3s;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-muted-foreground);
+  }
+  
+  /* Input focus ring enhancement */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+    ring: 3px;
+    ring-color: color-mix(in oklab, var(--solar) 50%, transparent);
+  }
+  
+  /* Backdrop blur enhancement */
+  @supports (backdrop-filter: blur(1px)) {
+    .backdrop-blur-enhanced {
+      backdrop-filter: blur(20px) saturate(150%) brightness(105%);
+      -webkit-backdrop-filter: blur(20px) saturate(150%) brightness(105%);
+    }
+  }
+  
+  /* Utility animations */
+  .animate-shimmer { animation: var(--animate-shimmer) !important; }
+  .animate-pulse-glow { animation: var(--animate-pulse-glow) !important; }
+  .animate-slide-up { animation: var(--animate-slide-up) !important; }
+  .animate-slide-in-left { animation: var(--animate-slide-in-left) !important; }
+  .animate-slide-in-right { animation: var(--animate-slide-in-right) !important; }
+  .animate-bounce-subtle { animation: var(--animate-bounce-subtle) !important; }
+  .animate-scale-in { animation: var(--animate-scale-in) !important; }
+  .animate-gradient-shift { animation: var(--animate-gradient-shift) !important; }
 }

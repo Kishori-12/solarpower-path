@@ -8,6 +8,7 @@ import { Vendors } from "@/components/Vendors";
 import { Carbon } from "@/components/Carbon";
 import { EMI } from "@/components/EMI";
 import { Footer } from "@/components/Footer";
+import { Dashboard } from "@/components/Dashboard";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -40,6 +41,7 @@ function Index() {
         <Vendors />
         <Carbon />
         <EMI />
+        <Dashboard />
       </main>
       <Footer />
     </div>

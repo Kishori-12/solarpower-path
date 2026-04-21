@@ -1,0 +1,118 @@
+const BASE = "http://127.0.0.1:5000";
+
+function getToken() {
+  return localStorage.getItem("sw_token");
+}
+
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = getToken();
+  const res = await fetch(`${BASE}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers,
+    },
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error || "Request failed");
+  return json;
+}
+
+export const api = {
+  // Auth
+  register: (name: string, email: string, password: string) =>
+    request<AuthResponse>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ name, email, password }),
+    }),
+
+  login: (email: string, password: string) =>
+    request<AuthResponse>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
+
+  // Solar
+  calculate: (monthly_bill: number, location: string, roof_area: number) =>
+    request<CalcResponse>("/calculate", {
+      method: "POST",
+      body: JSON.stringify({ monthly_bill, location, roof_area }),
+    }),
+
+  saveCalculation: (inputs: object, results: object) =>
+    request("/save-calculation", {
+      method: "POST",
+      body: JSON.stringify({ inputs, results }),
+    }),
+
+  myCalculations: () => request<{ data: SavedCalc[] }>("/my-calculations"),
+
+  // Vendors
+  getVendors: (location?: string) =>
+    request(`/get-vendors${location ? `?location=${location}` : ""}`),
+
+  recommendVendors: (location: string, capacity_kw?: number) =>
+    request(`/get-vendors/recommend?location=${location}${capacity_kw ? `&capacity_kw=${capacity_kw}` : ""}`),
+
+  // Schemes
+  getSchemes: () => request("/get-schemes"),
+
+  // User
+  getProfile: () => request<{ data: User }>("/user-data"),
+};
+
+// Types
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  created_at: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  data: { user: User; token: string };
+}
+
+export interface CalcResponse {
+  success: boolean;
+  data: {
+    inputs: { monthly_bill_inr: number; location: string; roof_area_sqm: number };
+    system: { recommended_capacity_kw: number; panels_needed: number; peak_sunlight_hours_per_day: number };
+    financials: { installation_cost_inr: number; monthly_savings_inr: number; annual_savings_inr: number; payback_period_years: number; roi_percent: number };
+    generation: { daily_generation_units: number; monthly_generation_units: number; annual_generation_units: number };
+    environment: { co2_offset_kg_per_year: number; trees_equivalent: number };
+    recommended_vendors: Vendor[];
+    applicable_schemes: Scheme[];
+  };
+}
+
+export interface Vendor {
+  id: number;
+  name: string;
+  rating: number;
+  price_per_kw_inr: number;
+  locations: string[];
+  score: number;
+  location_matched: boolean;
+  estimated_total_cost_inr?: number;
+}
+
+export interface Scheme {
+  id: number;
+  name: string;
+  provider: string;
+  subsidy_percent: number;
+  max_subsidy_inr: number;
+  eligibility: string;
+  link: string;
+}
+
+export interface SavedCalc {
+  id: number;
+  user_id: number;
+  inputs: object;
+  results: object;
+  saved_at: string;
+}
