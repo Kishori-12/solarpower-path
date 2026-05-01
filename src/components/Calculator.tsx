@@ -8,6 +8,7 @@ import { AnimatedNumber } from "./AnimatedNumber";
 import { api } from "@/lib/api";
 import { useAuth } from "@/store/authStore";
 import { AuthModal } from "@/components/AuthModal";
+import type { VendorRecommendationResponse, SchemeRecommendationResponse } from "@/lib/api";
 
 const states = [
   { v: "north",   n: "North India (Delhi/UP/Punjab)",    sun: 4.5 },
@@ -38,6 +39,8 @@ export function Calculator() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
   const [authOpen, setAuthOpen] = useState(false);
+  const [vendorRec, setVendorRec] = useState<VendorRecommendationResponse | null>(null);
+  const [schemeRec, setSchemeRec] = useState<SchemeRecommendationResponse | null>(null);
 
   // Local estimate for chart (instant feedback)
   const sun = states.find((s) => s.v === location)?.sun ?? 5.0;
@@ -54,9 +57,34 @@ export function Calculator() {
     setError("");
     setLoading(true);
     setSaved(false);
+    setVendorRec(null);
+    setSchemeRec(null);
     try {
       const res = await api.calculate(bill, location, roof / 10.764); // sqft → sqm
       setResult(res.data);
+
+      // Call AI recommendations in parallel
+      const fin = res.data.financials;
+      const sys = res.data.system;
+      
+      try {
+        // Estimate vendor price as average cost per kW
+        const vendorPrice = Math.round(fin.installation_cost_inr / sys.recommended_capacity_kw);
+        const vendorRating = 4.5; // Default rating for demo
+        const warranty = 10; // Default warranty for demo
+        
+        const vendorRes = await api.recommendVendor(vendorPrice, vendorRating, warranty, location);
+        setVendorRec(vendorRes);
+      } catch (e) {
+        console.warn("Vendor recommendation failed:", e);
+      }
+
+      try {
+        const schemeRes = await api.recommendScheme(location, budget, sys.recommended_capacity_kw);
+        setSchemeRec(schemeRes);
+      } catch (e) {
+        console.warn("Scheme recommendation failed:", e);
+      }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Calculation failed");
     } finally {
@@ -194,6 +222,36 @@ export function Calculator() {
                     <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">CO₂ Saved</div>
                     <div className="text-xl font-bold text-gradient-solar">{result.environment.co2_offset_kg_per_year} kg/yr</div>
                   </div>
+                </motion.div>
+              )}
+
+              {/* AI Recommendations Section */}
+              {result && (vendorRec || schemeRec) && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="grid grid-cols-2 gap-4 mt-4"
+                >
+                  {vendorRec && (
+                    <div className="glass-premium rounded-2xl p-4 border-l-4 border-solar">
+                      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">🏭 Best Vendor Match</div>
+                      <div className="text-lg font-bold text-gradient-solar mb-1">{vendorRec.vendor?.name ?? "No vendor found"}</div>
+                      <div className="text-sm font-semibold mb-2">{vendorRec.vendor_score.toFixed(1)}/100</div>
+                      <p className="text-xs text-muted-foreground mb-1">₹{vendorRec.vendor?.price_per_kw?.toLocaleString("en-IN")}/kW · Rating: {vendorRec.vendor?.rating}/5</p>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{vendorRec.recommendation}</p>
+                      <div className="mt-3 text-xs bg-solar/10 rounded px-2 py-1 text-solar font-medium">Confidence: {vendorRec.confidence}</div>
+                    </div>
+                  )}
+
+                  {schemeRec && (
+                    <div className="glass-premium rounded-2xl p-4 border-l-4 border-green-500">
+                      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">💰 Scheme Recommendation</div>
+                      <div className="text-lg font-bold text-green-500 mb-2">{schemeRec.scheme?.name ?? schemeRec.recommended_scheme ?? "No scheme available"}</div>
+                      <p className="text-sm text-muted-foreground mb-1">Subsidy: ₹{(schemeRec.scheme?.subsidy ?? schemeRec.estimated_subsidy).toLocaleString("en-IN")}</p>
+                      <p className="text-xs text-muted-foreground mb-2">Max: ₹{schemeRec.scheme?.max_amount?.toLocaleString("en-IN")}</p>
+                      <div className="text-xs bg-green-500/10 rounded px-2 py-1 text-green-600 font-medium">Eligibility: {schemeRec.eligibility}</div>
+                    </div>
+                  )}
                 </motion.div>
               )}
 

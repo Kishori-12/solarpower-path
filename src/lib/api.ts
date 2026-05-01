@@ -60,6 +60,19 @@ export const api = {
 
   // User
   getProfile: () => request<{ data: User }>("/user-data"),
+
+  // AI Recommendations
+  recommendVendor: (price: number, rating: number, warranty: number, location: string) =>
+    request<VendorRecommendationResponse>("/recommend/vendor", {
+      method: "POST",
+      body: JSON.stringify({ price, rating, warranty, location }),
+    }),
+
+  recommendScheme: (location: string, budget: number, capacity: number) =>
+    request<SchemeRecommendationResponse>("/recommend/scheme", {
+      method: "POST",
+      body: JSON.stringify({ location, budget, capacity }),
+    }),
 };
 
 // Types
@@ -115,4 +128,37 @@ export interface SavedCalc {
   inputs: object;
   results: object;
   saved_at: string;
+}
+
+export interface VendorRecommendationResponse {
+  success: boolean;
+  vendor_score: number;
+  recommendation: string;
+  confidence: "high" | "medium" | "low";
+  vendor: {
+    name: string;
+    price_per_kw: number;
+    rating: number;
+  };
+  factors: {
+    price: string;
+    rating: string;
+    warranty: string;
+  };
+}
+
+export interface SchemeRecommendationResponse {
+  success: boolean;
+  recommended_scheme: string;
+  scheme: {
+    name: string;
+    subsidy: number;
+    max_amount: number;
+  };
+  eligibility: "high" | "medium" | "emerging";
+  subsidy_percentage: number;
+  estimated_subsidy: number;
+  details: string;
+  alternatives: string[];
+  next_steps: string[];
 }

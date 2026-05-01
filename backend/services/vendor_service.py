@@ -67,3 +67,55 @@ def recommend_vendors(location, system_capacity_kw=None, top_n=3):
     scored.sort(key=lambda x: (x["score"], x["rating"]), reverse=True)
 
     return scored[:top_n]
+
+
+# ── AI-based Vendor Recommendation (using pre-trained ML model) ────
+import joblib
+import os
+
+_vendor_model = None
+
+def _load_vendor_model():
+    """Load the pre-trained vendor recommendation model."""
+    global _vendor_model
+    if _vendor_model is None:
+        try:
+            model_path = os.path.join(os.path.dirname(__file__), "..", "models", "vendor_recommendation_model.pkl")
+            _vendor_model = joblib.load(model_path)
+        except Exception as e:
+            raise Exception(f"Failed to load vendor recommendation model: {str(e)}")
+    return _vendor_model
+
+def recommend_vendor(price, rating, warranty):
+    """
+    Recommend a vendor using the pre-trained ML model.
+    
+    Args:
+        price (float): Price of the vendor offering (e.g., price_per_kw_inr)
+        rating (float): Rating of the vendor (e.g., 4.5)
+        warranty (int/float): Warranty period in years
+    
+    Returns:
+        dict: Prediction result with vendor recommendation
+    """
+    try:
+        if price is None or rating is None or warranty is None:
+            raise ValueError("price, rating, and warranty are required fields")
+        
+        model = _load_vendor_model()
+        
+        # Prepare feature array for prediction
+        features = [[price, rating, warranty]]
+        
+        # Make prediction
+        prediction = model.predict(features)
+        
+        return {
+            "success": True,
+            "vendor": str(prediction[0]),
+            "confidence": "high" if hasattr(model, 'predict_proba') else "medium"
+        }
+    except ValueError as e:
+        return {"success": False, "error": str(e)}
+    except Exception as e:
+        return {"success": False, "error": f"Model prediction failed: {str(e)}"}

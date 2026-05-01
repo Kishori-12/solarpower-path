@@ -7,13 +7,15 @@ function getToken() {
 async function req<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const isFormData = options.body instanceof FormData;
+
+  // Build headers — never set Content-Type for FormData (browser sets it with boundary)
+  const headers: Record<string, string> = {};
+  if (!isFormData) headers["Content-Type"] = "application/json";
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   const res = await fetch(`${BASE}${path}`, {
     ...options,
-    headers: {
-      ...(isFormData ? {} : { "Content-Type": "application/json" }),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
+    headers,
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json.error || "Request failed");
@@ -21,8 +23,13 @@ async function req<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export const vendorApi = {
-  register: (data: VendorRegisterInput) =>
-    req<VendorAuthResponse>("/register", { method: "POST", body: JSON.stringify(data) }),
+  register: (data: VendorRegisterInput) => {
+    console.log("📡 Sending vendor registration request with data:", data);
+    return req<VendorAuthResponse>("/register", { 
+      method: "POST", 
+      body: JSON.stringify(data) 
+    });
+  },
 
   login: (email: string, password: string) =>
     req<VendorAuthResponse>("/login", { method: "POST", body: JSON.stringify({ email, password }) }),

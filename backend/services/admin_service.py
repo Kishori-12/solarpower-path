@@ -1,5 +1,11 @@
 from models.user_model import _users, _calculations
-from models.vendor_model import _vendors, _documents, public_vendor
+from models.vendor_model import (
+    get_all_vendors,
+    public_vendor,
+    find_vendor_by_id,
+    get_documents_by_vendor,
+    get_all_documents,
+)
 from models.scheme_model import get_all_schemes
 from collections import Counter
 
@@ -13,34 +19,39 @@ def get_all_users():
 
 def get_all_vendors_admin():
     result = []
-    for v in _vendors:
-        docs = [d for d in _documents if d["vendor_id"] == v["id"]]
-        entry = {**public_vendor(v), "documents": docs, "doc_count": len(docs)}
+    # Fetch vendors from Firestore (all vendors)
+    vendors = get_all_vendors()
+    for v in vendors:
+        # v is already public_vendor-applied in get_all_approved_vendors()
+        docs = get_documents_by_vendor(v.get("id")) or []
+        entry = {**v, "documents": docs, "doc_count": len(docs)}
         result.append(entry)
     return result
 
 
 def get_vendor_with_docs(vendor_id: int):
-    vendor = next((v for v in _vendors if v["id"] == vendor_id), None)
+    vendor = find_vendor_by_id(vendor_id)
     if not vendor:
         return None
-    docs = [d for d in _documents if d["vendor_id"] == vendor_id]
+    docs = get_documents_by_vendor(vendor_id) or []
     return {**public_vendor(vendor), "documents": docs}
 
 
 def get_analytics():
     total_users = len(_users)
-    total_vendors = len(_vendors)
+    vendors = get_all_vendors()
+    total_vendors = len(vendors)
     total_calculations = len(_calculations)
     total_schemes = len(get_all_schemes())
 
-    vendor_status_counts = Counter(v["status"] for v in _vendors)
+    # Vendor status counts (from approved vendors only)
+    vendor_status_counts = Counter(v.get("status") for v in vendors)
     pending_vendors = vendor_status_counts.get("pending", 0)
     approved_vendors = vendor_status_counts.get("approved", 0)
     rejected_vendors = vendor_status_counts.get("rejected", 0)
 
     # Vendor location distribution
-    location_dist = Counter(v["location"] for v in _vendors)
+    location_dist = Counter(v.get("location") for v in vendors)
 
     # Total savings across all calculations
     total_savings = sum(
@@ -63,7 +74,14 @@ def get_analytics():
 
     # Registrations by date (last 7 days buckets)
     from datetime import datetime, timedelta
-    today = datetime.utcnow().date()
+    import pytz
+    
+    IST = pytz.timezone('Asia/Kolkata')
+    try:
+        today = datetime.now(IST).date()
+    except Exception as e:
+        print(f"Warning: Failed to get IST date, using UTC: {e}")
+        today = datetime.utcnow().date()
     user_reg_by_day = {}
     for i in range(6, -1, -1):
         day = str(today - timedelta(days=i))
@@ -77,10 +95,18 @@ def get_analytics():
     for i in range(6, -1, -1):
         day = str(today - timedelta(days=i))
         vendor_reg_by_day[day] = 0
-    for v in _vendors:
-        day = v["created_at"][:10]
-        if day in vendor_reg_by_day:
-            vendor_reg_by_day[day] += 1
+    for v in vendors:
+        day = v.get("created_at")
+        # created_at may be a Timestamp or ISO string
+        if isinstance(day, str):
+            day_str = day[:10]
+        else:
+            try:
+                day_str = str(day.date())
+            except Exception:
+                day_str = str(day)
+        if day_str in vendor_reg_by_day:
+            vendor_reg_by_day[day_str] += 1
 
     return {
         "overview": {

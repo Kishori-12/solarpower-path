@@ -32,7 +32,7 @@ export function VendorAuthModal({ open, onClose }: Props) {
       if (tab === "login") {
         await login(form.email, form.password);
       } else {
-        await register({
+        const payload = {
           company_name: form.company_name,
           email: form.email,
           password: form.password,
@@ -40,7 +40,18 @@ export function VendorAuthModal({ open, onClose }: Props) {
           location: form.location,
           price_per_kw: parseFloat(form.price_per_kw),
           experience_years: parseInt(form.experience_years),
+        };
+        console.log("📤 Vendor registration payload:", payload);
+        console.log("✓ All required fields present:", {
+          has_company_name: !!payload.company_name,
+          has_email: !!payload.email,
+          has_password: !!payload.password,
+          has_phone: !!payload.phone,
+          has_location: !!payload.location,
+          has_price_per_kw: payload.price_per_kw > 0,
+          has_experience_years: payload.experience_years >= 0,
         });
+        await register(payload);
       }
       onClose();
     } catch (err: unknown) {

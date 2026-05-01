@@ -11,7 +11,7 @@ const stats = [
 
 export function Carbon() {
   return (
-    <section className="relative py-24">
+    <section id="carbon" className="relative py-24">
       <div className="mx-auto max-w-7xl px-4">
         <div className="relative overflow-hidden rounded-[2rem] bg-gradient-eco p-10 md:p-16 shadow-glow">
           <div className="absolute -top-20 -right-20 h-80 w-80 rounded-full bg-white/10 blur-3xl" />

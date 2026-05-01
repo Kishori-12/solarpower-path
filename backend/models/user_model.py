@@ -1,4 +1,16 @@
 from datetime import datetime
+import pytz
+
+# Get India timezone
+IST = pytz.timezone('Asia/Kolkata')
+
+def get_ist_datetime():
+    """Get current datetime in India Standard Time (IST)"""
+    try:
+        return datetime.now(IST)
+    except Exception as e:
+        print(f"Warning: Failed to get IST time, using UTC: {e}")
+        return datetime.utcnow()
 
 # In-memory stores
 _users = []
@@ -15,7 +27,7 @@ def create_user(name, email, password_hash):
         "name": name,
         "email": email,
         "password_hash": password_hash,
-        "created_at": datetime.utcnow().isoformat()
+        "created_at": get_ist_datetime().isoformat()
     }
     _users.append(user)
     _user_id_counter += 1
@@ -42,7 +54,7 @@ def save_calculation(user_id, inputs, results):
         "user_id": user_id,
         "inputs": inputs,
         "results": results,
-        "saved_at": datetime.utcnow().isoformat()
+        "saved_at": get_ist_datetime().isoformat()
     }
     _calculations.append(calc)
     _calc_id_counter += 1

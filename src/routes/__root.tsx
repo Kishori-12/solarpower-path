@@ -1,5 +1,6 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { AuthProvider } from "@/store/authStore";
+import { Chatbot } from "@/components/Chatbot";
 
 import appCss from "../styles.css?url";
 
@@ -69,6 +70,7 @@ function RootComponent() {
   return (
     <AuthProvider>
       <Outlet />
+      <Chatbot />
     </AuthProvider>
   );
 }
