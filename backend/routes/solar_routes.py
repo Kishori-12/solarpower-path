@@ -57,7 +57,7 @@ def calculate_solar_legacy():
 @solar_bp.route("/save-calculation", methods=["POST"])
 @jwt_required()
 def save_calc():
-    user_id = int(get_jwt_identity())
+    user_id = get_jwt_identity()
     data = request.get_json()
 
     if not data:
@@ -79,6 +79,6 @@ def save_calc():
 @solar_bp.route("/my-calculations", methods=["GET"])
 @jwt_required()
 def my_calculations():
-    user_id = int(get_jwt_identity())
+    user_id = get_jwt_identity()
     calcs = get_calculations_by_user(user_id)
     return jsonify({"success": True, "count": len(calcs), "data": calcs}), 200

@@ -28,9 +28,9 @@ export const adminApi = {
 
   getVendors: (status?: string) =>
     req<{ data: AdminVendor[] }>(`/admin/vendors${status ? `?status=${status}` : ""}`),
-  getVendorDetail: (id: number) => req<{ data: AdminVendor }>(`/admin/vendors/${id}`),
-  approveVendor: (id: number) => req(`/admin/vendor/approve/${id}`, { method: "PUT" }),
-  rejectVendor: (id: number, reason: string) =>
+  getVendorDetail: (id: string) => req<{ data: AdminVendor }>(`/admin/vendors/${id}`),
+  approveVendor: (id: string) => req(`/admin/vendor/approve/${id}`, { method: "PUT" }),
+  rejectVendor: (id: string, reason: string) =>
     req(`/admin/vendor/reject/${id}`, { method: "PUT", body: JSON.stringify({ reason }) }),
 
   getSchemes: () => req<{ data: AdminScheme[] }>("/admin/schemes"),
@@ -63,7 +63,7 @@ export interface AdminUser {
 }
 
 export interface AdminVendor {
-  id: number;
+  id: string;
   company_name: string;
   email: string;
   phone: string;
@@ -80,8 +80,9 @@ export interface AdminVendor {
 }
 
 export interface VendorDoc {
-  id: number;
+  id: string;
   doc_type: string;
+  filename: string;
   original_name: string;
   file_size: number;
   status: string;

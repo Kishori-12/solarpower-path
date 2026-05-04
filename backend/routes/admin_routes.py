@@ -59,7 +59,7 @@ def vendors():
     return jsonify({"success": True, "count": len(all_vendors), "data": all_vendors}), 200
 
 
-@admin_bp.route("/vendors/<int:vendor_id>", methods=["GET"])
+@admin_bp.route("/vendors/<string:vendor_id>", methods=["GET"])
 @admin_required
 def vendor_detail(vendor_id):
     vendor = get_vendor_with_docs(vendor_id)
@@ -68,7 +68,7 @@ def vendor_detail(vendor_id):
     return jsonify({"success": True, "data": vendor}), 200
 
 
-@admin_bp.route("/vendor/approve/<int:vendor_id>", methods=["PUT"])
+@admin_bp.route("/vendor/approve/<string:vendor_id>", methods=["PUT"])
 @admin_required
 def approve_vendor(vendor_id):
     vendor = update_vendor_status(vendor_id, "approved")
@@ -77,7 +77,7 @@ def approve_vendor(vendor_id):
     return jsonify({"success": True, "message": "Vendor approved", "data": public_vendor(vendor)}), 200
 
 
-@admin_bp.route("/vendor/reject/<int:vendor_id>", methods=["PUT"])
+@admin_bp.route("/vendor/reject/<string:vendor_id>", methods=["PUT"])
 @admin_required
 def reject_vendor(vendor_id):
     data = request.get_json() or {}

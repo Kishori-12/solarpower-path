@@ -23,12 +23,13 @@ export const Route = createFileRoute("/vendor")({
 function VendorPage() {
   const { isLoggedIn } = useVendorAuth();
   const [authOpen, setAuthOpen] = useState(false);
+  const [authTab, setAuthTab] = useState<"login" | "register">("login");
 
   if (isLoggedIn) return <VendorDashboard />;
 
   return (
     <>
-      <VendorAuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
+      <VendorAuthModal open={authOpen} onClose={() => setAuthOpen(false)} initialTab={authTab} />
 
       <div className="min-h-screen flex items-center justify-center px-4 py-24">
         <div className="mx-auto max-w-5xl w-full">
@@ -49,14 +50,20 @@ function VendorPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.98 }}
-                onClick={() => setAuthOpen(true)}
+                onClick={() => {
+                  setAuthTab("register");
+                  setAuthOpen(true);
+                }}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-gradient-solar text-primary-foreground font-semibold shadow-glow hover:shadow-xl transition-all"
               >
                 Register as Vendor <ArrowRight className="h-5 w-5" />
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.98 }}
-                onClick={() => setAuthOpen(true)}
+                onClick={() => {
+                  setAuthTab("login");
+                  setAuthOpen(true);
+                }}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl glass-premium-dark font-semibold hover:bg-muted/60 transition-colors"
               >
                 Sign In

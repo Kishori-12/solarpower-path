@@ -68,7 +68,7 @@ export interface Vendor {
   location: string;
   price_per_kw: number;
   experience_years: number;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "under_review" | "approved" | "rejected";
   rejection_reason: string | null;
   rating: number;
   created_at: string;
@@ -93,7 +93,7 @@ export interface VendorDocument {
 
 export interface VendorStatus {
   vendor_id: number;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "under_review" | "approved" | "rejected";
   rejection_reason: string | null;
   documents: VendorDocument[];
   missing_documents: string[];

@@ -43,25 +43,12 @@ def load_models():
     except Exception as e:
         print("Model loading error:", str(e))
 
+VALID_LOCATIONS = ["north", "south", "east", "west", "central"]
+
 @recommendation_bp.route("/vendor", methods=["POST"])
 def recommend_vendor():
     """
     Recommend best vendor based on price, rating, warranty.
-    
-    Request body:
-    {
-        "price": 150000,      # Price in INR
-        "rating": 4.5,        # Rating 1-5
-        "warranty": 5         # Warranty in years
-    }
-    
-    Response:
-    {
-        "success": true,
-        "vendor_score": 67.5,
-        "recommendation": "This vendor offers good value. High rating and competitive warranty.",
-        "confidence": "high"
-    }
     """
     try:
         if vendor_model is None:
@@ -70,12 +57,15 @@ def recommend_vendor():
         data = request.get_json()
         
         # Validate input
-        if not all(k in data for k in ["price", "rating", "warranty"]):
-            return jsonify({"error": "Missing required fields: price, rating, warranty"}), 400
+        if not all(k in data for k in ["price", "rating", "warranty", "location"]):
+            return jsonify({"error": "Missing required fields: price, rating, warranty, location"}), 400
         
         price = float(data.get("price"))
         rating = float(data.get("rating"))
         warranty = float(data.get("warranty"))
+        location = data.get("location", "central").lower()
+        if location not in VALID_LOCATIONS:
+            location = "central"
         
         # Validate ranges
         if not (20000 <= price <= 1500000):
@@ -85,35 +75,48 @@ def recommend_vendor():
         if not (0.5 <= warranty <= 15):
             return jsonify({"error": "Warranty should be between 0.5 and 15 years"}), 400
         
-        # Predict vendor score
-        score = float(vendor_model.predict([[price, rating, warranty]])[0])
-        score = max(0, min(100, score))  # Clamp between 0-100
-        
-        # Generate recommendation text
-        if score >= 75:
-            recommendation = "Excellent choice! This vendor offers great value with competitive pricing and strong warranty."
-            confidence = "high"
-        elif score >= 60:
-            recommendation = "Good option. This vendor provides solid quality and reasonable pricing."
-            confidence = "medium"
+        # Find best vendor(s) available in the selected location
+        candidates = recommend_vendors(location, top_n=100)
+        location_matches = [v for v in candidates if v.get("location_matched")]
+        best = location_matches[0] if location_matches else (candidates[0] if candidates else None)
+
+        if best:
+            score = float(vendor_model.predict([[best["price_per_kw_inr"], best["rating"], warranty]])[0])
+            score = max(0, min(100, score))
+            if best.get("location_matched"):
+                if score >= 75:
+                    recommendation = f"AI recommendation: {best['name']} is an excellent match in {location.title()} with good pricing and strong rating."
+                    confidence = "high"
+                elif score >= 60:
+                    recommendation = f"AI recommendation: {best['name']} is a good local vendor match for your needs."
+                    confidence = "medium"
+                else:
+                    recommendation = f"AI recommendation: {best['name']} is available in your area, but compare other vendors before deciding."
+                    confidence = "medium"
+            else:
+                recommendation = f"AI recommendation: {best['name']} is available in a nearby region and is the best match we could find for {location.title()}."
+                confidence = "medium"
+            vendor_info = {
+                "name": best["name"],
+                "price_per_kw": best["price_per_kw_inr"],
+                "rating": best["rating"]
+            }
         else:
-            recommendation = "Consider comparing with other vendors. This option has room for improvement."
-            confidence = "medium"
-        
-        # Pick best matching real vendor by location and score
-        matched = recommend_vendors(data.get("location", "south"), top_n=1)
-        best = matched[0] if matched else None
+            score = 0.0
+            recommendation = "No approved vendor is available for your selected location right now. Please try a nearby region or check back later."
+            confidence = "low"
+            vendor_info = {
+                "name": "No vendor available",
+                "price_per_kw": 0,
+                "rating": 0
+            }
 
         return jsonify({
             "success": True,
             "vendor_score": round(score, 2),
             "recommendation": recommendation,
             "confidence": confidence,
-            "vendor": {
-                "name": best["name"] if best else "No vendor found",
-                "price_per_kw": best["price_per_kw_inr"] if best else round(price),
-                "rating": best["rating"] if best else round(rating, 1)
-            },
+            "vendor": vendor_info,
             "factors": {
                 "price": "Lower is better",
                 "rating": f"Strong at {rating}/5",

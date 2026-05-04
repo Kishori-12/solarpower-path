@@ -51,18 +51,12 @@ export function Vendors() {
                 v.best ? "ring-2 ring-solar-glow shadow-glow scale-105 md:scale-100" : ""
               }`}
             >
-              {/* Best choice badge - animated */}
+              {/* Best choice badge - positioned inline */}
               {v.best && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="absolute -top-4 left-8 inline-flex items-center gap-2 rounded-full bg-gradient-solar px-4 py-2 text-xs font-bold text-primary-foreground shadow-glow"
-                >
-                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 3, repeat: Infinity }}>
-                    <Crown className="h-4 w-4" />
-                  </motion.div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-gradient-solar px-3 py-1 text-xs font-bold text-primary-foreground shadow-glow mb-4">
+                  <Crown className="h-3 w-3" />
                   Best Choice
-                </motion.div>
+                </div>
               )}
 
               {/* Background gradient */}
@@ -73,7 +67,7 @@ export function Vendors() {
                 }}
               />
 
-              <div className="grid grid-cols-2 md:grid-cols-6 gap-4 items-center relative z-10">
+              <div className="grid grid-cols-2 md:grid-cols-7 gap-4 items-center relative z-10">
                 {/* Vendor info */}
                 <div className="md:col-span-2">
                   <motion.div
@@ -132,16 +126,18 @@ export function Vendors() {
                     </motion.span>
                   </div>
                 </div>
-              </div>
 
-              {/* CTA button on hover */}
-              <motion.button
-                initial={{ opacity: 0, x: -10 }}
-                whileHover={{ opacity: 1, x: 0 }}
-                className="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 px-4 py-2 rounded-lg bg-solar-glow text-primary-foreground text-sm font-semibold hover:shadow-glow transition-all"
-              >
-                Select
-              </motion.button>
+                {/* CTA button - always visible */}
+                <div className="flex justify-end">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-4 py-2 rounded-lg bg-gradient-solar text-primary-foreground text-sm font-semibold shadow-glow hover:shadow-xl transition-all"
+                  >
+                    Select
+                  </motion.button>
+                </div>
+              </div>
             </motion.div>
           ))}
         </div>

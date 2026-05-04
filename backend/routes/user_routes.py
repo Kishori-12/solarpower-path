@@ -8,7 +8,7 @@ user_bp = Blueprint("user", __name__)
 @user_bp.route("/user-data", methods=["GET"])
 @jwt_required()
 def user_data():
-    user_id = int(get_jwt_identity())
+    user_id = get_jwt_identity()
     user = find_user_by_id(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
@@ -18,7 +18,7 @@ def user_data():
 @user_bp.route("/user-data", methods=["PUT"])
 @jwt_required()
 def update_user():
-    user_id = int(get_jwt_identity())
+    user_id = get_jwt_identity()
     user = find_user_by_id(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404

@@ -20,16 +20,21 @@ export function AdminVendors() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
-  const [expanded, setExpanded] = useState<number | null>(null);
-  const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
-  const [rejectTarget, setRejectTarget] = useState<number | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
     try {
       const res = await adminApi.getVendors(filter === "all" ? undefined : filter);
-      setVendors(res.data);
+      // treat under_review as pending on the frontend
+      const data = res.data.map((v) => ({
+        ...v,
+        status: (v.status === "under_review" ? "pending" : v.status) as AdminVendor["status"],
+      }));
+      setVendors(data);
     } finally { setLoading(false); }
   };
 
@@ -40,7 +45,7 @@ export function AdminVendors() {
     v.email.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleApprove = async (id: number) => {
+  const handleApprove = async (id: string) => {
     setActionLoading(id);
     try { await adminApi.approveVendor(id); await load(); }
     finally { setActionLoading(null); }
@@ -131,7 +136,8 @@ export function AdminVendors() {
       ) : (
         <div className="space-y-3">
           {filtered.map((v) => {
-            const cfg = STATUS_CFG[v.status];
+            const status = (v.status && STATUS_CFG[v.status]) ? v.status : "pending";
+            const cfg = STATUS_CFG[status];
             const StatusIcon = cfg.icon;
             const isExpanded = expanded === v.id;
 
@@ -152,7 +158,7 @@ export function AdminVendors() {
                     <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cfg.bg} ${cfg.color}`}>{cfg.label}</span>
                     <span className="text-xs text-muted-foreground">{v.doc_count}/4 docs</span>
 
-                    {v.status === "pending" && (
+                    {status === "pending" && (
                       <>
                         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                           onClick={() => handleApprove(v.id)} disabled={actionLoading === v.id}
@@ -190,14 +196,21 @@ export function AdminVendors() {
                       ) : (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                           {v.documents.map((doc) => (
-                            <div key={doc.id} className="glass-premium rounded-xl p-3">
+                            <a
+                              key={doc.id}
+                              href={doc.filename}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="glass-premium rounded-xl p-3 hover:shadow-glow transition-all block group"
+                            >
                               <div className="flex items-center gap-2 mb-1">
-                                <FileText className="h-4 w-4 text-solar-glow shrink-0" />
+                                <FileText className="h-4 w-4 text-solar-glow shrink-0 group-hover:scale-110 transition-transform" />
                                 <span className="text-xs font-semibold uppercase">{doc.doc_type}</span>
                               </div>
                               <div className="text-xs text-muted-foreground truncate">{doc.original_name}</div>
                               <div className="text-xs text-muted-foreground">{(doc.file_size / 1024).toFixed(1)} KB</div>
-                            </div>
+                              <div className="text-xs text-solar-glow mt-1 font-semibold">Click to view ↗</div>
+                            </a>
                           ))}
                         </div>
                       )}

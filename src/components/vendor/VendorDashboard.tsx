@@ -21,8 +21,24 @@ const LOCATIONS: Record<string, string> = {
   east: "East India",  west: "West India", central: "Central India",
 };
 
+function formatIstDateTime(value?: string | null) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 const STATUS_CONFIG = {
   pending:  { icon: Clock,        color: "text-yellow-400", bg: "bg-yellow-400/10", label: "Pending Review" },
+  under_review: { icon: Clock,    color: "text-blue-400",  bg: "bg-blue-400/10",  label: "Under Review" },
   approved: { icon: CheckCircle,  color: "text-green-400",  bg: "bg-green-400/10",  label: "Approved" },
   rejected: { icon: XCircle,      color: "text-red-400",    bg: "bg-red-400/10",    label: "Rejected" },
 };
@@ -96,7 +112,7 @@ export function VendorDashboard() {
     }
   };
 
-  const statusCfg = STATUS_CONFIG[vendor?.status ?? "pending"];
+  const statusCfg = STATUS_CONFIG[vendor?.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
   const StatusIcon = statusCfg.icon;
 
   const tabs: { key: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
@@ -218,7 +234,7 @@ export function VendorDashboard() {
 
                 <div>
                   <label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-2 block">Member Since</label>
-                  <div className="font-semibold px-4 py-3 rounded-xl glass-premium">{vendor?.created_at?.split("T")[0]}</div>
+                  <div className="font-semibold px-4 py-3 rounded-xl glass-premium">{formatIstDateTime(vendor?.created_at)}</div>
                 </div>
               </div>
             </motion.div>
@@ -304,6 +320,7 @@ export function VendorDashboard() {
                       <div>
                         <div className={`text-xl font-bold ${statusCfg.color}`}>{statusCfg.label}</div>
                         {vendor?.status === "pending" && <p className="text-sm text-muted-foreground mt-1">Your documents are under review. This usually takes 1–2 business days.</p>}
+                        {vendor?.status === "under_review" && <p className="text-sm text-muted-foreground mt-1">Your documents are under review. This usually takes 1–2 business days.</p>}
                         {vendor?.status === "approved" && <p className="text-sm text-muted-foreground mt-1">Your profile is live and visible to customers.</p>}
                         {vendor?.status === "rejected" && vendor.rejection_reason && (
                           <p className="text-sm text-red-300 mt-1">Reason: {vendor.rejection_reason}</p>
@@ -336,7 +353,7 @@ export function VendorDashboard() {
                             {doc ? <CheckCircle className="h-5 w-5 text-green-400 shrink-0" /> : <AlertCircle className="h-5 w-5 text-yellow-400 shrink-0" />}
                             <div>
                               <div className="text-sm font-semibold">{label}</div>
-                              <div className="text-xs text-muted-foreground">{doc ? `Uploaded ${doc.uploaded_at.split("T")[0]}` : "Not uploaded"}</div>
+                              <div className="text-xs text-muted-foreground">{doc ? `Uploaded ${formatIstDateTime(doc.uploaded_at)}` : "Not uploaded"}</div>
                             </div>
                           </div>
                         );

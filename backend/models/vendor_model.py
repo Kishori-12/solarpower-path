@@ -33,7 +33,7 @@ def create_vendor(company_name, email, password_hash, phone, location, price_per
             "location": location,
             "price_per_kw": price_per_kw,
             "experience_years": experience_years,
-            "status": "pending",          # pending | approved | rejected
+            "status": "pending",          # pending | under_review | approved | rejected
             "rejection_reason": None,
             "rating": 0.0,
             "created_at": get_ist_datetime(),

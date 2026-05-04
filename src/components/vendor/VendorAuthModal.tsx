@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Sun, Loader2 } from "lucide-react";
 import { useVendorAuth } from "@/store/vendorAuthStore";
 
-interface Props { open: boolean; onClose: () => void; }
+interface Props { open: boolean; onClose: () => void; initialTab?: "login" | "register"; }
 
 const LOCATIONS = ["north", "south", "east", "west", "central"];
 
@@ -12,7 +12,7 @@ const LOCATION_LABELS: Record<string, string> = {
   east: "East India", west: "West India", central: "Central India",
 };
 
-export function VendorAuthModal({ open, onClose }: Props) {
+export function VendorAuthModal({ open, onClose, initialTab = "login" }: Props) {
   const { login, register } = useVendorAuth();
   const [tab, setTab] = useState<"login" | "register">("login");
   const [loading, setLoading] = useState(false);
@@ -20,8 +20,22 @@ export function VendorAuthModal({ open, onClose }: Props) {
 
   const [form, setForm] = useState({
     company_name: "", email: "", password: "",
-    phone: "", location: "south", price_per_kw: "50000", experience_years: "5",
+    phone: "", location: "south", price_per_kw: "", experience_years: "",
   });
+
+  useEffect(() => {
+    if (open) {
+      setTab(initialTab);
+      setError("");
+    }
+  }, [open, initialTab]);
+
+  useEffect(() => {
+    if (open) {
+      setTab(initialTab);
+      setError("");
+    }
+  }, [open, initialTab]);
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 

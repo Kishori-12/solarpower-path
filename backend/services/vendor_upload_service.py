@@ -81,7 +81,7 @@ def _check_and_update_status(vendor_id):
     docs = get_documents_by_vendor(vendor_id)
     uploaded_types = {d["doc_type"] for d in docs}
     if VALID_DOC_TYPES.issubset(uploaded_types):
-        update_vendor_status(vendor_id, "approved")
+        update_vendor_status(vendor_id, "under_review")
 
 
 def get_vendor_status(vendor_id):

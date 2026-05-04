@@ -77,13 +77,33 @@ export function Calculator() {
         setVendorRec(vendorRes);
       } catch (e) {
         console.warn("Vendor recommendation failed:", e);
+        setVendorRec({
+          success: false,
+          vendor_score: 0,
+          recommendation: "No approved vendor is available for your selected location right now.",
+          confidence: "low",
+          vendor: { name: "No vendor available", price_per_kw: 0, rating: 0 },
+          factors: { price: "N/A", rating: "N/A", warranty: "N/A" }
+        });
       }
 
       try {
-        const schemeRes = await api.recommendScheme(location, budget, sys.recommended_capacity_kw);
+        const capacity = sys.recommended_capacity_kw > 0 ? sys.recommended_capacity_kw : 0.5;
+        const schemeRes = await api.recommendScheme(location, budget, capacity);
         setSchemeRec(schemeRes);
       } catch (e) {
         console.warn("Scheme recommendation failed:", e);
+        setSchemeRec({
+          success: false,
+          recommended_scheme: "No scheme available",
+          scheme: { name: "No scheme available", subsidy: 0, max_amount: 0 },
+          eligibility: "emerging",
+          subsidy_percentage: 0,
+          estimated_subsidy: 0,
+          details: "Scheme recommendation could not be fetched at this time.",
+          alternatives: [],
+          next_steps: []
+        });
       }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Calculation failed");
@@ -235,11 +255,20 @@ export function Calculator() {
                   {vendorRec && (
                     <div className="glass-premium rounded-2xl p-4 border-l-4 border-solar">
                       <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2 font-semibold">🏭 Best Vendor Match</div>
-                      <div className="text-lg font-bold text-gradient-solar mb-1">{vendorRec.vendor?.name ?? "No vendor found"}</div>
-                      <div className="text-sm font-semibold mb-2">{vendorRec.vendor_score.toFixed(1)}/100</div>
-                      <p className="text-xs text-muted-foreground mb-1">₹{vendorRec.vendor?.price_per_kw?.toLocaleString("en-IN")}/kW · Rating: {vendorRec.vendor?.rating}/5</p>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{vendorRec.recommendation}</p>
-                      <div className="mt-3 text-xs bg-solar/10 rounded px-2 py-1 text-solar font-medium">Confidence: {vendorRec.confidence}</div>
+                      <div className="text-lg font-bold text-gradient-solar mb-1">
+                        {vendorRec.vendor?.name ?? "No vendor available"}
+                      </div>
+
+                      {vendorRec.vendor?.name === "No vendor available" ? (
+                        <p className="text-sm text-muted-foreground break-words">{vendorRec.recommendation}</p>
+                      ) : (
+                        <>
+                          <div className="text-sm font-semibold mb-2">{vendorRec.vendor_score.toFixed(1)}/100</div>
+                          <p className="text-xs text-muted-foreground mb-1">₹{vendorRec.vendor?.price_per_kw?.toLocaleString("en-IN")}/kW · Rating: {vendorRec.vendor?.rating}/5</p>
+                          <p className="text-sm text-muted-foreground break-words">{vendorRec.recommendation}</p>
+                          <div className="mt-3 text-xs bg-solar/10 rounded px-2 py-1 text-solar font-medium">Confidence: {vendorRec.confidence}</div>
+                        </>
+                      )}
                     </div>
                   )}
 

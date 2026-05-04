@@ -1,45 +1,61 @@
 from datetime import datetime
 import pytz
+from firebase_config import get_db
 
-# Get India timezone
 IST = pytz.timezone('Asia/Kolkata')
 
 def get_ist_datetime():
-    """Get current datetime in India Standard Time (IST)"""
     try:
         return datetime.now(IST)
-    except Exception as e:
-        print(f"Warning: Failed to get IST time, using UTC: {e}")
+    except Exception:
         return datetime.utcnow()
-
-# In-memory stores
-_users = []
-_calculations = []
-_user_id_counter = 1
-_calc_id_counter = 1
 
 
 # ---------- User ----------
 def create_user(name, email, password_hash):
-    global _user_id_counter
-    user = {
-        "id": _user_id_counter,
-        "name": name,
-        "email": email,
-        "password_hash": password_hash,
-        "created_at": get_ist_datetime().isoformat()
-    }
-    _users.append(user)
-    _user_id_counter += 1
-    return user
+    try:
+        db = get_db()
+        user = {
+            "name": name,
+            "email": email.lower(),
+            "password_hash": password_hash,
+            "created_at": get_ist_datetime().isoformat(),
+        }
+        doc_ref = db.collection("users").document()
+        doc_ref.set(user)
+        user["id"] = doc_ref.id
+        return user
+    except Exception as e:
+        print(f"Error creating user: {e}")
+        raise
 
 
 def find_user_by_email(email):
-    return next((u for u in _users if u["email"] == email), None)
+    try:
+        db = get_db()
+        docs = db.collection("users").where("email", "==", email.lower()).limit(1).stream()
+        for doc in docs:
+            u = doc.to_dict()
+            u["id"] = doc.id
+            return u
+        return None
+    except Exception as e:
+        print(f"Error finding user by email: {e}")
+        return None
 
 
 def find_user_by_id(user_id):
-    return next((u for u in _users if u["id"] == user_id), None)
+    try:
+        db = get_db()
+        doc = db.collection("users").document(str(user_id)).get()
+        if doc.exists:
+            u = doc.to_dict()
+            u["id"] = doc.id
+            return u
+        return None
+    except Exception as e:
+        print(f"Error finding user by id: {e}")
+        return None
 
 
 def public_user(user):
@@ -48,18 +64,33 @@ def public_user(user):
 
 # ---------- Calculation ----------
 def save_calculation(user_id, inputs, results):
-    global _calc_id_counter
-    calc = {
-        "id": _calc_id_counter,
-        "user_id": user_id,
-        "inputs": inputs,
-        "results": results,
-        "saved_at": get_ist_datetime().isoformat()
-    }
-    _calculations.append(calc)
-    _calc_id_counter += 1
-    return calc
+    try:
+        db = get_db()
+        calc = {
+            "user_id": str(user_id),
+            "inputs": inputs,
+            "results": results,
+            "saved_at": get_ist_datetime().isoformat(),
+        }
+        doc_ref = db.collection("calculations").document()
+        doc_ref.set(calc)
+        calc["id"] = doc_ref.id
+        return calc
+    except Exception as e:
+        print(f"Error saving calculation: {e}")
+        raise
 
 
 def get_calculations_by_user(user_id):
-    return [c for c in _calculations if c["user_id"] == user_id]
+    try:
+        db = get_db()
+        docs = db.collection("calculations").where("user_id", "==", str(user_id)).stream()
+        calcs = []
+        for doc in docs:
+            c = doc.to_dict()
+            c["id"] = doc.id
+            calcs.append(c)
+        return calcs
+    except Exception as e:
+        print(f"Error getting calculations: {e}")
+        return []

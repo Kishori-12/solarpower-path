@@ -1,10 +1,11 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard, Users, Building2, FileText,
   BarChart3, Sun, LogOut, ChevronRight,
 } from "lucide-react";
 import { useAdminAuth } from "@/store/adminAuthStore";
+import { adminApi } from "@/lib/adminApi";
 
 type Page = "dashboard" | "vendors" | "users" | "schemes" | "analytics";
 
@@ -15,15 +16,22 @@ interface Props {
 }
 
 const NAV = [
-  { key: "dashboard" as Page,  label: "Dashboard",  icon: LayoutDashboard },
-  { key: "vendors"   as Page,  label: "Vendors",    icon: Building2 },
-  { key: "users"     as Page,  label: "Users",      icon: Users },
-  { key: "schemes"   as Page,  label: "Schemes",    icon: FileText },
-  { key: "analytics" as Page,  label: "Analytics",  icon: BarChart3 },
+  { key: "dashboard" as Page, label: "Dashboard", icon: LayoutDashboard },
+  { key: "vendors"   as Page, label: "Vendors",   icon: Building2 },
+  { key: "users"     as Page, label: "Users",     icon: Users },
+  { key: "schemes"   as Page, label: "Schemes",   icon: FileText },
+  { key: "analytics" as Page, label: "Analytics", icon: BarChart3 },
 ];
 
 export function AdminLayout({ page, onNavigate, children }: Props) {
   const { admin, logout } = useAdminAuth();
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    adminApi.getAnalytics()
+      .then((r) => setPendingCount(r.data.vendor_status.pending ?? 0))
+      .catch(() => {});
+  }, [page]); // re-fetch whenever page changes so count stays fresh
 
   return (
     <div className="flex min-h-screen">
@@ -62,6 +70,13 @@ export function AdminLayout({ page, onNavigate, children }: Props) {
               >
                 <Icon className="h-4 w-4 shrink-0" />
                 <span className="flex-1 text-left">{label}</span>
+                {key === "vendors" && pendingCount > 0 && (
+                  <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
+                    active ? "bg-white/20 text-white" : "bg-red-500 text-white"
+                  }`}>
+                    {pendingCount}
+                  </span>
+                )}
                 {active && <ChevronRight className="h-3 w-3" />}
               </motion.button>
             );

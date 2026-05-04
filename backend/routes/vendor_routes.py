@@ -156,6 +156,7 @@ def recommend_ai():
     
     Expected JSON input:
     {
+        "location": "central",
         "price": 48000.0,
         "rating": 4.5,
         "warranty": 10
@@ -166,18 +167,22 @@ def recommend_ai():
         return jsonify({"error": "Request body is required"}), 400
     
     # Validate required fields
+    location = data.get("location")
     price = data.get("price")
     rating = data.get("rating")
     warranty = data.get("warranty")
     
-    if price is None or rating is None or warranty is None:
+    if location is None or price is None or rating is None or warranty is None:
         return jsonify({
             "error": "Missing required fields",
-            "required": ["price", "rating", "warranty"]
+            "required": ["location", "price", "rating", "warranty"]
         }), 400
+
+    if location.lower() not in VALID_LOCATIONS:
+        return jsonify({"error": f"Invalid location. Must be one of: {', '.join(VALID_LOCATIONS)}"}), 400
     
-    # Call the AI recommendation function
-    result = recommend_vendor(price, rating, warranty)
+    # Call the AI recommendation function with location context
+    result = recommend_vendor(price, rating, warranty, location)
     
     if result.get("success"):
         return jsonify(result), 200
