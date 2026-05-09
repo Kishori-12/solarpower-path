@@ -32,6 +32,16 @@ app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 jwt = JWTManager(app)
 
 
+@jwt.unauthorized_loader
+def unauthorized_response(err):
+    return jsonify({"error": err}), 401
+
+
+@jwt.invalid_token_loader
+def invalid_token_response(err):
+    return jsonify({"error": err}), 422
+
+
 app.register_blueprint(auth_bp)
 app.register_blueprint(solar_bp)
 app.register_blueprint(vendor_bp)

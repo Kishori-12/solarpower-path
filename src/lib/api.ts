@@ -4,6 +4,19 @@ function getToken() {
   return localStorage.getItem("sw_token");
 }
 
+function normalizeLocation(location: string) {
+  const normalized = String(location).toLowerCase();
+  if (["north", "south", "central", "east", "west"].includes(normalized)) {
+    return normalized;
+  }
+  return "central";
+}
+
+function clearAuthToken() {
+  localStorage.removeItem("sw_token");
+  localStorage.removeItem("sw_user");
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
   const res = await fetch(`${BASE}${path}`, {
@@ -15,7 +28,13 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     },
   });
   const json = await res.json();
-  if (!res.ok) throw new Error(json.error || "Request failed");
+  if (!res.ok) {
+    if (res.status === 401) {
+      clearAuthToken();
+    }
+    const errorMessage = json.error || json.msg || json.message || "Request failed";
+    throw new Error(errorMessage);
+  }
   return json;
 }
 
@@ -62,16 +81,16 @@ export const api = {
   getProfile: () => request<{ data: User }>("/user-data"),
 
   // AI Recommendations
-  recommendVendor: (price: number, rating: number, warranty: number, location: string) =>
+  recommendVendor: (price_per_kw: number, rating: number, experience_years: number, location: string) =>
     request<VendorRecommendationResponse>("/recommend/vendor", {
       method: "POST",
-      body: JSON.stringify({ price, rating, warranty, location }),
+      body: JSON.stringify({ price_per_kw, rating, experience_years, location }),
     }),
 
   recommendScheme: (location: string, budget: number, capacity: number) =>
     request<SchemeRecommendationResponse>("/recommend/scheme", {
       method: "POST",
-      body: JSON.stringify({ location, budget, capacity }),
+      body: JSON.stringify({ location: normalizeLocation(location), budget, capacity }),
     }),
 };
 

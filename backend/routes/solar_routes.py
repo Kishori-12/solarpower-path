@@ -73,6 +73,7 @@ def save_calc():
         calc = save_calculation(user_id, inputs, results)
         return jsonify({"success": True, "data": calc}), 201
     except Exception as e:
+        print(f"[SAVE_CALC_ERROR] user_id={user_id} error={e}")
         return jsonify({"error": str(e)}), 500
 
 

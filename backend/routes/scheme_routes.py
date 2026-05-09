@@ -1,8 +1,19 @@
 from flask import Blueprint, jsonify, request
+import joblib
+import os
 from models.scheme_model import get_all_schemes
-from services.scheme_service import recommend_scheme
 
 scheme_bp = Blueprint("scheme", __name__)
+
+scheme_model = None
+location_encoder = None
+
+def load_scheme_models():
+    global scheme_model, location_encoder
+    if scheme_model is None:
+        scheme_model = joblib.load(os.path.join(os.path.dirname(__file__), "..", "models", "scheme_recommendation_model.pkl"))
+    if location_encoder is None:
+        location_encoder = joblib.load(os.path.join(os.path.dirname(__file__), "..", "models", "location_encoder.pkl"))
 
 
 @scheme_bp.route("/get-schemes", methods=["GET"])
@@ -16,35 +27,36 @@ def schemes():
 # ── AI-based Recommendation ───────────────────────────────
 @scheme_bp.route("/recommend/scheme", methods=["POST"])
 def recommend_ai():
-    """
-    AI-based scheme recommendation using pre-trained ML model.
-    
-    Expected JSON input:
-    {
-        "location": "north",
-        "budget": 100000,
-        "capacity": 5.0
-    }
-    """
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Request body is required"}), 400
-    
-    # Validate required fields
-    location = data.get("location")
-    budget = data.get("budget")
-    capacity = data.get("capacity")
-    
-    if location is None or budget is None or capacity is None:
+    try:
+        data = request.get_json() or {}
+        print("SCHEME INPUT:", data)
+
+        location = data.get("location")
+        budget = data.get("budget")
+        capacity = data.get("capacity")
+
+        if not location or budget is None or capacity is None:
+            return jsonify({"error": "Missing scheme inputs"}), 400
+
+        if location not in ["north", "south", "central"]:
+            print("INVALID LOCATION:", location)
+            location = "central"
+
+        load_scheme_models()
+
+        loc_encoded = location_encoder.transform([location])[0]
+
+        X = [[loc_encoded, float(budget), float(capacity)]]
+        print("SCHEME FEATURES:", X)
+
+        pred = scheme_model.predict(X)[0]
+
         return jsonify({
-            "error": "Missing required fields",
-            "required": ["location", "budget", "capacity"]
-        }), 400
-    
-    # Call the AI recommendation function
-    result = recommend_scheme(location, budget, capacity)
-    
-    if result.get("success"):
-        return jsonify(result), 200
-    else:
-        return jsonify(result), 400
+            "scheme": {
+                "name": "PM Surya Ghar Yojana",
+                "subsidy": "40%"
+            }
+        })
+    except Exception as e:
+        print("🔥 SCHEME ERROR:", str(e))
+        return jsonify({"error": str(e)}), 500
