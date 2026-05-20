@@ -1,27 +1,38 @@
 import { motion } from "framer-motion";
-import { Star, Crown, IndianRupee } from "lucide-react";
+import { Star, ShieldCheck, Droplets } from "lucide-react";
+import { useState, useEffect } from "react";
 
-const vendors = [
-  {
-    name: "Tata Power Solar",
-    rating: 4.8,
-    price: 58000,
-    warranty: 25,
-    install: 7,
-    score: 95,
-    best: true,
-  },
-  { name: "Adani Solar", rating: 4.6, price: 55000, warranty: 25, install: 10, score: 90 },
-  { name: "Vikram Solar", rating: 4.5, price: 52000, warranty: 20, install: 12, score: 86 },
-  { name: "Loom Solar", rating: 4.3, price: 50000, warranty: 20, install: 14, score: 80 },
-  { name: "Waaree Energies", rating: 4.4, price: 53000, warranty: 22, install: 11, score: 84 },
-];
+interface Cleaner {
+  id: string;
+  name: string;
+  rating: number;
+  pricePerVisit: number;
+  experience: string;
+  verified: boolean;
+  score: number;
+  best: boolean;
+  status?: string;
+  mobile?: string;
+  address?: string;
+}
 
-export function Vendors() {
-  const filteredVendors = vendors;
+export function Cleaning() {
+  const [cleaners, setCleaners] = useState<Cleaner[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    fetch("http://127.0.0.1:5000/cleaner/list")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setCleaners(data.data);
+        }
+      })
+      .catch((err) => console.error("Error fetching cleaners:", err))
+      .finally(() => setLoading(false));
+  }, []);
   return (
-    <section id="vendors" className="relative py-24">
+    <section id="cleaning" className="relative py-24 bg-background">
       <div className="mx-auto max-w-7xl px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -33,9 +44,9 @@ export function Vendors() {
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="inline-block rounded-full glass-premium px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-sky"
+            className="inline-block rounded-full glass-premium px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-solar-glow"
           >
-            Vendor Comparison
+            Maintenance Services
           </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -44,29 +55,36 @@ export function Vendors() {
             transition={{ delay: 0.1 }}
             className="mt-6 text-4xl md:text-5xl font-bold leading-tight"
           >
-            Top installers, <span className="text-gradient-solar">side by side</span>
+            Trusted <span className="text-gradient-solar">Cleaning & Maintenance</span> Experts
           </motion.h2>
+          <p className="mt-4 text-muted-foreground text-lg">
+            Keep your solar panels at peak efficiency with professional cleaning services.
+          </p>
         </motion.div>
 
         <div className="space-y-4">
-          {filteredVendors.length > 0 ? (
-            filteredVendors.map((v, i) => (
+          {loading ? (
+            <div className="text-center py-12 glass-premium-dark rounded-3xl">
+              <p className="text-muted-foreground text-lg">Loading cleaners...</p>
+            </div>
+          ) : cleaners.length > 0 ? (
+            cleaners.map((c, i) => (
               <motion.div
-                key={v.name}
+                key={c.id || c.name}
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.06 }}
                 whileHover={{ x: 4, y: -2 }}
                 className={`glass-premium-dark rounded-3xl p-7 hover-lift relative overflow-hidden group cursor-pointer transition-all ${
-                  v.best ? "ring-2 ring-solar-glow shadow-glow scale-105 md:scale-100" : ""
+                  c.best ? "ring-2 ring-solar-glow shadow-glow scale-105 md:scale-100" : ""
                 }`}
               >
-                {/* Best choice badge - positioned inline */}
-                {v.best && (
+                {/* Best choice badge */}
+                {c.best && (
                   <div className="inline-flex items-center gap-2 rounded-full bg-gradient-solar px-3 py-1 text-xs font-bold text-primary-foreground shadow-glow mb-4">
-                    <Crown className="h-3 w-3" />
-                    Best Choice
+                    <Droplets className="h-3 w-3" />
+                    Top Rated
                   </div>
                 )}
 
@@ -74,18 +92,36 @@ export function Vendors() {
                 <motion.div
                   className="absolute -top-20 -right-20 h-40 w-40 rounded-full opacity-0 blur-3xl group-hover:opacity-20 transition-opacity"
                   style={{
-                    background: v.best ? "var(--gradient-solar)" : "var(--gradient-sky)",
+                    background: c.best ? "var(--gradient-solar)" : "var(--gradient-sky)",
                   }}
                 />
 
                 <div className="grid grid-cols-2 md:grid-cols-7 gap-4 items-center relative z-10">
-                  {/* Vendor info */}
+                  {/* Info */}
                   <div className="md:col-span-2">
                     <motion.div
                       whileHover={{ color: "var(--solar-glow)" }}
-                      className="font-bold text-lg transition-colors"
+                      className="font-bold text-lg transition-colors flex items-center gap-2"
                     >
-                      {v.name}
+                      {c.name}
+                      <div
+                        className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                          c.status === "approved"
+                            ? "bg-green-500/20 text-green-400"
+                            : c.status === "rejected"
+                              ? "bg-red-500/20 text-red-400"
+                              : c.status === "under_review"
+                                ? "bg-orange-500/20 text-orange-400"
+                                : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {(c.status || "pending").replace("_", " ")}
+                      </div>
+                      {c.verified && (
+                        <span title="Verified Professional">
+                          <ShieldCheck className="h-4 w-4 text-green-500" />
+                        </span>
+                      )}
                     </motion.div>
                     <div className="flex items-center gap-1 mt-2">
                       {Array.from({ length: 5 }).map((_, idx) => (
@@ -96,7 +132,7 @@ export function Vendors() {
                         >
                           <Star
                             className={`h-4 w-4 transition-colors ${
-                              idx < Math.round(v.rating)
+                              idx < Math.round(c.rating || 0)
                                 ? "fill-solar-glow text-solar-glow"
                                 : "text-muted-foreground/30"
                             }`}
@@ -104,66 +140,68 @@ export function Vendors() {
                         </motion.div>
                       ))}
                       <span className="ml-2 text-sm font-semibold text-muted-foreground">
-                        {v.rating}
+                        {c.rating || 0}
                       </span>
+                    </div>
+
+                    <div className="mt-4 text-sm text-muted-foreground space-y-2">
+                      <div>
+                        <span className="font-semibold text-primary">Phone:</span> {c.mobile || "N/A"}
+                      </div>
+                      <div>
+                        <span className="font-semibold text-primary">Address:</span> {c.address || "N/A"}
+                      </div>
                     </div>
                   </div>
 
                   {/* Stats */}
-                  <Stat label="Per kW" value={`₹${(v.price / 1000).toFixed(0)}k`} />
-                  <Stat label="Warranty" value={`${v.warranty} yrs`} />
-                  <Stat label="Install" value={`${v.install} days`} />
+                  <Stat label="Per Visit" value={`₹${c.pricePerVisit || 0}`} />
+                  <Stat label="Experience" value={c.experience || "N/A"} />
+                  <Stat label="Verified" value={c.verified ? "Yes" : "No"} />
 
                   {/* Score bar */}
                   <div>
                     <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-2">
-                      Score
+                      Service Score
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="flex-1 h-2.5 rounded-full bg-muted/60 overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
-                          whileInView={{ width: `${v.score}%` }}
+                          whileInView={{ width: `${c.score || 0}%` }}
                           viewport={{ once: true }}
                           transition={{ duration: 1.2, delay: 0.2, ease: "easeOut" }}
                           className="h-full bg-gradient-solar rounded-full"
                         />
                       </div>
                       <motion.span
-                        key={v.score}
+                        key={c.score}
                         initial={{ scale: 0.5 }}
                         animate={{ scale: 1 }}
                         className="text-sm font-bold min-w-[2rem] text-right"
                       >
-                        {v.score}
+                        {c.score || 0}
                       </motion.span>
                     </div>
                   </div>
 
-                  {/* CTA button - always visible */}
+                  {/* CTA button */}
                   <div className="flex justify-end">
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="px-4 py-2 rounded-lg bg-gradient-solar text-primary-foreground text-sm font-semibold shadow-glow hover:shadow-xl transition-all"
+                      className="px-4 py-2 rounded-lg bg-gradient-solar text-primary-foreground text-sm font-semibold shadow-glow hover:shadow-xl transition-all whitespace-nowrap"
                     >
-                      Select
+                      Book Now
                     </motion.button>
                   </div>
                 </div>
               </motion.div>
             ))
           ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-12 glass-premium-dark rounded-3xl"
-            >
-              <p className="text-muted-foreground text-lg">No vendors found within this budget.</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Try increasing your budget or exploring other options.
-              </p>
-            </motion.div>
+            <div className="text-center py-12 glass-premium-dark rounded-3xl">
+              <p className="text-muted-foreground text-lg">No cleaning personnel found.</p>
+            </div>
           )}
         </div>
       </div>

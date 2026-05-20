@@ -108,9 +108,9 @@ export function EMI() {
                 className="absolute -top-8 -right-8 h-32 w-32 opacity-20 rounded-full"
                 style={{ background: "rgba(255, 255, 255, 0.3)" }}
                 animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, linear: true }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
               />
-              
+
               <motion.div
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
@@ -182,7 +182,9 @@ export function EMI() {
               className="glass-premium-dark rounded-2xl p-5 border border-eco/30"
             >
               <p className="text-sm text-muted-foreground">
-                <span className="font-semibold text-eco">💡 Tip:</span> Solar systems pay for themselves in {Math.ceil(amount / 50000)} years of savings. Consider a shorter EMI tenure for better returns!
+                <span className="font-semibold text-eco">💡 Tip:</span> Solar systems pay for
+                themselves in {Math.ceil(amount / 50000)} years of savings. Consider a shorter EMI
+                tenure for better returns!
               </p>
             </motion.div>
           </motion.div>

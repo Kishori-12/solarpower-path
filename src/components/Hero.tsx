@@ -3,16 +3,18 @@ import { ArrowRight, Sparkles, Sun, Leaf, Zap, Battery, ChevronDown } from "luci
 import heroImg from "@/assets/hero-solar.jpg";
 
 const floats = [
-  { Icon: Sun,     top: "12%", left: "8%",  delay: 0 },
-  { Icon: Leaf,    top: "70%", left: "5%",  delay: 1.2 },
-  { Icon: Zap,     top: "20%", left: "88%", delay: 0.6 },
+  { Icon: Sun, top: "12%", left: "8%", delay: 0 },
+  { Icon: Leaf, top: "70%", left: "5%", delay: 1.2 },
+  { Icon: Zap, top: "20%", left: "88%", delay: 0.6 },
   { Icon: Battery, top: "75%", left: "85%", delay: 1.8 },
 ];
 
 export function Hero() {
   return (
-    <section id="top" className="relative min-h-screen flex items-center overflow-hidden pt-24 pb-12">
-
+    <section
+      id="top"
+      className="relative min-h-screen flex items-center overflow-hidden pt-24 pb-12"
+    >
       {/* Background image */}
       <div className="absolute inset-0 -z-10">
         <img
@@ -54,7 +56,6 @@ export function Hero() {
 
       <div className="relative mx-auto max-w-7xl px-4 w-full">
         <div className="grid gap-10 lg:grid-cols-2 items-center">
-
           {/* Content */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -91,7 +92,8 @@ export function Hero() {
               transition={{ delay: 0.3 }}
               className="text-lg md:text-xl text-white/85 max-w-xl leading-relaxed drop-shadow"
             >
-              Calculate solar savings, explore government schemes, compare vendors, and maximize your ROI — all in one intelligent platform.
+              Calculate solar savings, explore government schemes, compare vendors, and maximize
+              your ROI — all in one intelligent platform.
             </motion.p>
 
             {/* CTA Buttons */}
@@ -131,7 +133,10 @@ export function Hero() {
               <div className="flex items-center gap-2">
                 <div className="flex -space-x-2">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-8 w-8 rounded-full bg-gradient-solar border-2 border-white/30 shadow" />
+                    <div
+                      key={i}
+                      className="h-8 w-8 rounded-full bg-gradient-solar border-2 border-white/30 shadow"
+                    />
                   ))}
                 </div>
                 <span className="font-semibold text-white">50K+ Users</span>

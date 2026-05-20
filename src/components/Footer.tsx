@@ -13,7 +13,8 @@ export function Footer() {
               <span className="text-gradient-solar">SolarWise</span>
             </div>
             <p className="mt-4 text-muted-foreground max-w-md">
-              Smart solar decisions made simple. Compare schemes, calculate ROI, and choose the best vendors — powered by data.
+              Smart solar decisions made simple. Compare schemes, calculate ROI, and choose the best
+              vendors — powered by data.
             </p>
             <div className="mt-5 flex gap-3">
               {[Twitter, Github, Linkedin, Mail].map((Icon, i) => (
@@ -37,9 +38,7 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} SolarWise. All rights reserved.
           </p>
-          <p className="text-sm font-semibold text-gradient-solar">
-            Powering a Greener Future 🌱
-          </p>
+          <p className="text-sm font-semibold text-gradient-solar">Powering a Greener Future 🌱</p>
         </div>
       </div>
     </footer>
@@ -53,7 +52,10 @@ function FooterCol({ title, links }: { title: string; links: string[] }) {
       <ul className="space-y-2">
         {links.map((l) => (
           <li key={l}>
-            <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <a
+              href="#"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
               {l}
             </a>
           </li>

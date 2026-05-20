@@ -3,22 +3,24 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sun, Moon, Menu, X, Shield } from "lucide-react";
 
 const links = [
-  { href: "#features",   label: "Features" },
+  { href: "#features", label: "Features" },
   { href: "#calculator", label: "Calculator" },
-  { href: "#schemes",    label: "Schemes" },
-  { href: "#vendors",    label: "Vendors" },
-  { href: "#emi",        label: "EMI" },
+  { href: "#schemes", label: "Schemes" },
+  { href: "#vendors", label: "Vendors" },
+  { href: "#cleaning", label: "Cleaning" },
+  { href: "#emi", label: "EMI" },
 ];
 
 const portalLinks = [
   { href: "/vendor", label: "Vendor Portal", accent: false },
-  { href: "/admin",  label: "Admin",         accent: true  },
+  { href: "/cleaner", label: "Cleaner Portal", accent: false },
+  { href: "/admin", label: "Admin", accent: true },
 ];
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen]         = useState(false);
-  const [dark, setDark]         = useState(false);
+  const [open, setOpen] = useState(false);
+  const [dark, setDark] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -32,7 +34,9 @@ export function Navbar() {
   }, [dark]);
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "py-2" : "py-4"}`}>
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "py-2" : "py-4"}`}
+    >
       <div className="mx-auto max-w-7xl px-4">
         <motion.nav
           initial={{ opacity: 0, y: -20 }}
@@ -102,7 +106,15 @@ export function Navbar() {
                 whileTap={{ scale: 0.97 }}
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl glass-premium text-sm font-semibold hover:shadow-glow transition-all"
               >
-                Vendor Portal
+                Vendor
+              </motion.a>
+              <motion.a
+                href="/cleaner"
+                whileHover={{ scale: 1.04, y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl glass-premium text-sm font-semibold hover:shadow-glow transition-all"
+              >
+                Cleaner
               </motion.a>
               <motion.a
                 href="/admin"
@@ -124,11 +136,23 @@ export function Navbar() {
             >
               <AnimatePresence mode="wait">
                 {open ? (
-                  <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                  <motion.div
+                    key="close"
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
                     <X className="h-5 w-5" />
                   </motion.div>
                 ) : (
-                  <motion.div key="menu" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                  <motion.div
+                    key="menu"
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
                     <Menu className="h-5 w-5" />
                   </motion.div>
                 )}

@@ -12,7 +12,8 @@ export function Dashboard() {
   useEffect(() => {
     if (!isLoggedIn) return;
     setLoading(true);
-    api.myCalculations()
+    api
+      .myCalculations()
       .then((res) => setCalcs(res.data))
       .catch(() => setCalcs([]))
       .finally(() => setLoading(false));
@@ -55,17 +56,28 @@ export function Dashboard() {
             { label: "Calculations", value: calcs.length, icon: Zap, suffix: "" },
             {
               label: "Total Savings/yr",
-              value: calcs.reduce((s, c) => s + ((c.results as any)?.financials?.annual_savings_inr ?? 0), 0),
+              value: calcs.reduce(
+                (s, c) => s + ((c.results as any)?.financials?.annual_savings_inr ?? 0),
+                0,
+              ),
               icon: IndianRupee,
               prefix: "₹",
             },
             {
               label: "CO₂ Offset/yr",
-              value: calcs.reduce((s, c) => s + ((c.results as any)?.environment?.co2_offset_kg_per_year ?? 0), 0),
+              value: calcs.reduce(
+                (s, c) => s + ((c.results as any)?.environment?.co2_offset_kg_per_year ?? 0),
+                0,
+              ),
               icon: Leaf,
               suffix: " kg",
             },
-            { label: "Member Since", value: user?.created_at?.split("T")[0] ?? "—", icon: User, raw: true },
+            {
+              label: "Member Since",
+              value: user?.created_at?.split("T")[0] ?? "—",
+              icon: User,
+              raw: true,
+            },
           ].map((stat, i) => (
             <motion.div
               key={stat.label}
@@ -77,7 +89,9 @@ export function Dashboard() {
             >
               <div className="flex items-center gap-2 mb-2">
                 <stat.icon className="h-4 w-4 text-solar-glow" />
-                <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">{stat.label}</span>
+                <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                  {stat.label}
+                </span>
               </div>
               <div className="text-2xl font-bold text-gradient-solar">
                 {stat.raw
@@ -91,9 +105,7 @@ export function Dashboard() {
         {/* Saved calculations */}
         <h3 className="text-xl font-bold mb-4">Saved Calculations</h3>
 
-        {loading && (
-          <div className="text-center text-muted-foreground py-12">Loading...</div>
-        )}
+        {loading && <div className="text-center text-muted-foreground py-12">Loading...</div>}
 
         {!loading && calcs.length === 0 && (
           <motion.div
@@ -122,24 +134,40 @@ export function Dashboard() {
                 className="glass-premium-dark rounded-3xl p-6 grid grid-cols-2 md:grid-cols-5 gap-4 items-center"
               >
                 <div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Location</div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                    Location
+                  </div>
                   <div className="font-bold capitalize">{inp?.location ?? "—"}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Monthly Bill</div>
-                  <div className="font-bold">₹{inp?.monthly_bill_inr?.toLocaleString("en-IN") ?? "—"}</div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                    Monthly Bill
+                  </div>
+                  <div className="font-bold">
+                    ₹{inp?.monthly_bill_inr?.toLocaleString("en-IN") ?? "—"}
+                  </div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">System Size</div>
-                  <div className="font-bold text-gradient-solar">{sys?.recommended_capacity_kw ?? "—"} kW</div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                    System Size
+                  </div>
+                  <div className="font-bold text-gradient-solar">
+                    {sys?.recommended_capacity_kw ?? "—"} kW
+                  </div>
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Annual Savings</div>
-                  <div className="font-bold text-gradient-solar">₹{fin?.annual_savings_inr?.toLocaleString("en-IN") ?? "—"}</div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                    Annual Savings
+                  </div>
+                  <div className="font-bold text-gradient-solar">
+                    ₹{fin?.annual_savings_inr?.toLocaleString("en-IN") ?? "—"}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">{calc.saved_at?.split("T")[0]}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {calc.saved_at?.split("T")[0]}
+                  </span>
                 </div>
               </motion.div>
             );

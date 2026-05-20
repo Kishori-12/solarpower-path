@@ -15,7 +15,11 @@ export const Route = createFileRoute("/vendor")({
   head: () => ({
     meta: [
       { title: "Vendor Portal – SolarWise" },
-      { name: "description", content: "Register as a solar vendor on SolarWise. Manage your profile, upload documents, and get verified." },
+      {
+        name: "description",
+        content:
+          "Register as a solar vendor on SolarWise. Manage your profile, upload documents, and get verified.",
+      },
     ],
   }),
 });
@@ -33,23 +37,29 @@ function VendorPage() {
 
       <div className="min-h-screen flex items-center justify-center px-4 py-24">
         <div className="mx-auto max-w-5xl w-full">
-
           {/* Hero */}
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-16"
+          >
             <div className="inline-flex items-center gap-2 glass-premium px-4 py-2 rounded-full mb-6">
               <Sun className="h-4 w-4 text-solar-glow" />
               <span className="text-sm font-semibold">SolarWise Vendor Portal</span>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold leading-tight mb-6">
-              Grow your solar<br />
+              Grow your solar
+              <br />
               <span className="text-gradient-solar">installation business</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-xl mx-auto mb-10">
-              Join India's leading solar platform. Get verified, reach thousands of customers, and manage your business — all in one place.
+              Join India's leading solar platform. Get verified, reach thousands of customers, and
+              manage your business — all in one place.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <motion.button
-                whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   setAuthTab("register");
                   setAuthOpen(true);
@@ -59,7 +69,8 @@ function VendorPage() {
                 Register as Vendor <ArrowRight className="h-5 w-5" />
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   setAuthTab("login");
                   setAuthOpen(true);
@@ -74,9 +85,21 @@ function VendorPage() {
           {/* Feature cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { icon: Building2, title: "Easy Registration", desc: "Register your company in minutes. Upload GST, PAN, license, and photo to get verified." },
-              { icon: ShieldCheck, title: "Verified Badge", desc: "Get a verified badge once documents are approved. Build trust with customers instantly." },
-              { icon: TrendingUp, title: "More Leads", desc: "Appear in our recommendation engine. Get matched with customers based on location and price." },
+              {
+                icon: Building2,
+                title: "Easy Registration",
+                desc: "Register your company in minutes. Upload GST, PAN, license, and photo to get verified.",
+              },
+              {
+                icon: ShieldCheck,
+                title: "Verified Badge",
+                desc: "Get a verified badge once documents are approved. Build trust with customers instantly.",
+              },
+              {
+                icon: TrendingUp,
+                title: "More Leads",
+                desc: "Appear in our recommendation engine. Get matched with customers based on location and price.",
+              },
             ].map(({ icon: Icon, title, desc }, i) => (
               <motion.div
                 key={title}

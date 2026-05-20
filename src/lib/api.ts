@@ -72,7 +72,9 @@ export const api = {
     request(`/get-vendors${location ? `?location=${location}` : ""}`),
 
   recommendVendors: (location: string, capacity_kw?: number) =>
-    request(`/get-vendors/recommend?location=${location}${capacity_kw ? `&capacity_kw=${capacity_kw}` : ""}`),
+    request(
+      `/get-vendors/recommend?location=${location}${capacity_kw ? `&capacity_kw=${capacity_kw}` : ""}`,
+    ),
 
   // Schemes
   getSchemes: () => request("/get-schemes"),
@@ -81,7 +83,12 @@ export const api = {
   getProfile: () => request<{ data: User }>("/user-data"),
 
   // AI Recommendations
-  recommendVendor: (price_per_kw: number, rating: number, experience_years: number, location: string) =>
+  recommendVendor: (
+    price_per_kw: number,
+    rating: number,
+    experience_years: number,
+    location: string,
+  ) =>
     request<VendorRecommendationResponse>("/recommend/vendor", {
       method: "POST",
       body: JSON.stringify({ price_per_kw, rating, experience_years, location }),
@@ -111,9 +118,23 @@ export interface CalcResponse {
   success: boolean;
   data: {
     inputs: { monthly_bill_inr: number; location: string; roof_area_sqm: number };
-    system: { recommended_capacity_kw: number; panels_needed: number; peak_sunlight_hours_per_day: number };
-    financials: { installation_cost_inr: number; monthly_savings_inr: number; annual_savings_inr: number; payback_period_years: number; roi_percent: number };
-    generation: { daily_generation_units: number; monthly_generation_units: number; annual_generation_units: number };
+    system: {
+      recommended_capacity_kw: number;
+      panels_needed: number;
+      peak_sunlight_hours_per_day: number;
+    };
+    financials: {
+      installation_cost_inr: number;
+      monthly_savings_inr: number;
+      annual_savings_inr: number;
+      payback_period_years: number;
+      roi_percent: number;
+    };
+    generation: {
+      daily_generation_units: number;
+      monthly_generation_units: number;
+      annual_generation_units: number;
+    };
     environment: { co2_offset_kg_per_year: number; trees_equivalent: number };
     recommended_vendors: Vendor[];
     applicable_schemes: Scheme[];

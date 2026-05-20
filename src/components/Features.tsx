@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import {
   BarChart3,
   Landmark,
@@ -13,15 +13,51 @@ import {
 type Feat = { icon: LucideIcon; title: string; desc: string; tint: string; href: string };
 
 const features: Feat[] = [
-  { icon: BarChart3, title: "Solar Savings Calculator", desc: "Estimate generation, cost & monthly savings instantly.", tint: "var(--gradient-solar)", href: "#calculator" },
-  { icon: Landmark,  title: "Government Schemes",       desc: "Discover PM Surya Ghar, subsidies & state benefits.",  tint: "var(--gradient-sky)",   href: "#schemes" },
-  { icon: Building2, title: "Vendor Comparison",        desc: "Rank top installers by price, rating & warranty.",     tint: "var(--gradient-eco)",   href: "#vendors" },
-  { icon: TrendingUp,title: "ROI Analysis",             desc: "Visualize payback period and 25-year returns.",        tint: "var(--gradient-solar)", href: "#calculator" },
-  { icon: Leaf,      title: "Carbon Footprint",         desc: "Track CO₂ saved and your green impact.",              tint: "var(--gradient-eco)",   href: "#carbon" },
-  { icon: CreditCard,title: "EMI Calculator",           desc: "Plan financing with flexible loan tenures.",           tint: "var(--gradient-sky)",   href: "#emi" },
+  {
+    icon: BarChart3,
+    title: "Solar Savings Calculator",
+    desc: "Estimate generation, cost & monthly savings instantly.",
+    tint: "var(--gradient-solar)",
+    href: "#calculator",
+  },
+  {
+    icon: Landmark,
+    title: "Government Schemes",
+    desc: "Discover PM Surya Ghar, subsidies & state benefits.",
+    tint: "var(--gradient-sky)",
+    href: "#schemes",
+  },
+  {
+    icon: Building2,
+    title: "Vendor Comparison",
+    desc: "Rank top installers by price, rating & warranty.",
+    tint: "var(--gradient-eco)",
+    href: "#vendors",
+  },
+  {
+    icon: TrendingUp,
+    title: "ROI Analysis",
+    desc: "Visualize payback period and 25-year returns.",
+    tint: "var(--gradient-solar)",
+    href: "#calculator",
+  },
+  {
+    icon: Leaf,
+    title: "Carbon Footprint",
+    desc: "Track CO₂ saved and your green impact.",
+    tint: "var(--gradient-eco)",
+    href: "#carbon",
+  },
+  {
+    icon: CreditCard,
+    title: "EMI Calculator",
+    desc: "Plan financing with flexible loan tenures.",
+    tint: "var(--gradient-sky)",
+    href: "#emi",
+  },
 ];
 
-const container = {
+const container: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -32,7 +68,7 @@ const container = {
   },
 };
 
-const item = {
+const item: Variants = {
   hidden: { opacity: 0, y: 30 },
   show: {
     opacity: 1,
@@ -124,9 +160,7 @@ export function Features() {
                 >
                   {f.title}
                 </motion.h3>
-                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                  {f.desc}
-                </p>
+                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
 
                 {/* Learn more link */}
                 <motion.button

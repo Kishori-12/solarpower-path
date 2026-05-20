@@ -20,11 +20,15 @@ export function VendorAuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const t = localStorage.getItem("sw_vendor_token");
     const v = localStorage.getItem("sw_vendor");
-    if (t && v) { setToken(t); setVendor(JSON.parse(v)); }
+    if (t && v) {
+      setToken(t);
+      setVendor(JSON.parse(v));
+    }
   }, []);
 
   const persist = (v: Vendor, t: string) => {
-    setVendor(v); setToken(t);
+    setVendor(v);
+    setToken(t);
     localStorage.setItem("sw_vendor_token", t);
     localStorage.setItem("sw_vendor", JSON.stringify(v));
   };
@@ -40,7 +44,8 @@ export function VendorAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    setVendor(null); setToken(null);
+    setVendor(null);
+    setToken(null);
     localStorage.removeItem("sw_vendor_token");
     localStorage.removeItem("sw_vendor");
   };
@@ -50,11 +55,15 @@ export function VendorAuthProvider({ children }: { children: ReactNode }) {
       const res = await vendorApi.getProfile();
       setVendor(res.data);
       localStorage.setItem("sw_vendor", JSON.stringify(res.data));
-    } catch { logout(); }
+    } catch {
+      logout();
+    }
   };
 
   return (
-    <VendorAuthContext.Provider value={{ vendor, token, isLoggedIn: !!token, login, register, logout, refreshVendor }}>
+    <VendorAuthContext.Provider
+      value={{ vendor, token, isLoggedIn: !!token, login, register, logout, refreshVendor }}
+    >
       {children}
     </VendorAuthContext.Provider>
   );

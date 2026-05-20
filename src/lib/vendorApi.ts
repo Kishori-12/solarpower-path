@@ -25,14 +25,17 @@ async function req<T>(path: string, options: RequestInit = {}): Promise<T> {
 export const vendorApi = {
   register: (data: VendorRegisterInput) => {
     console.log("📡 Sending vendor registration request with data:", data);
-    return req<VendorAuthResponse>("/register", { 
-      method: "POST", 
-      body: JSON.stringify(data) 
+    return req<VendorAuthResponse>("/register", {
+      method: "POST",
+      body: JSON.stringify(data),
     });
   },
 
   login: (email: string, password: string) =>
-    req<VendorAuthResponse>("/login", { method: "POST", body: JSON.stringify({ email, password }) }),
+    req<VendorAuthResponse>("/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
 
   getProfile: () => req<{ data: Vendor }>("/profile"),
 

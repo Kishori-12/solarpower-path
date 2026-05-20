@@ -1,9 +1,16 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Sun, Loader2, Shield, BarChart3,
-  Users, Building2, FileText, ArrowRight, X,
+  Sun,
+  Loader2,
+  Shield,
+  BarChart3,
+  Users,
+  Building2,
+  FileText,
+  ArrowRight,
+  X,
 } from "lucide-react";
 import { AdminAuthProvider, useAdminAuth } from "@/store/adminAuthStore";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -12,8 +19,9 @@ import { AdminVendors } from "@/components/admin/pages/AdminVendors";
 import { AdminUsers } from "@/components/admin/pages/AdminUsers";
 import { AdminSchemes } from "@/components/admin/pages/AdminSchemes";
 import { AdminAnalytics } from "@/components/admin/pages/AdminAnalytics";
+import { AdminCleaners } from "@/components/admin/pages/AdminCleaners";
 
-type Page = "dashboard" | "vendors" | "users" | "schemes" | "analytics";
+type Page = "dashboard" | "vendors" | "cleaners" | "users" | "schemes" | "analytics";
 
 export const Route = createFileRoute("/admin")({
   component: () => (
@@ -22,10 +30,7 @@ export const Route = createFileRoute("/admin")({
     </AdminAuthProvider>
   ),
   head: () => ({
-    meta: [
-      { title: "Admin Panel – SolarWise" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Admin Panel – SolarWise" }, { name: "robots", content: "noindex" }],
   }),
 });
 
@@ -35,11 +40,12 @@ function AdminPage() {
 
   if (!isLoggedIn) return <AdminLanding />;
 
-  const PAGE_MAP: Record<Page, JSX.Element> = {
+  const PAGE_MAP: Record<Page, React.ReactNode> = {
     dashboard: <AdminDashboard />,
-    vendors:   <AdminVendors />,
-    users:     <AdminUsers />,
-    schemes:   <AdminSchemes />,
+    vendors: <AdminVendors />,
+    cleaners: <AdminCleaners />,
+    users: <AdminUsers />,
+    schemes: <AdminSchemes />,
     analytics: <AdminAnalytics />,
   };
 
@@ -55,10 +61,26 @@ function AdminLanding() {
   const [modalOpen, setModalOpen] = useState(false);
 
   const features = [
-    { icon: Building2, title: "Vendor Verification",  desc: "Review, approve or reject vendor applications with full document inspection." },
-    { icon: Users,     title: "User Management",      desc: "View all registered users, track activity and manage accounts." },
-    { icon: FileText,  title: "Schemes CRUD",         desc: "Create, update and delete government solar subsidy schemes in real time." },
-    { icon: BarChart3, title: "Platform Analytics",   desc: "Monitor registrations, savings, CO₂ offset and system-wide KPIs." },
+    {
+      icon: Building2,
+      title: "Vendor Verification",
+      desc: "Review, approve or reject vendor applications with full document inspection.",
+    },
+    {
+      icon: Users,
+      title: "User Management",
+      desc: "View all registered users, track activity and manage accounts.",
+    },
+    {
+      icon: FileText,
+      title: "Schemes CRUD",
+      desc: "Create, update and delete government solar subsidy schemes in real time.",
+    },
+    {
+      icon: BarChart3,
+      title: "Platform Analytics",
+      desc: "Monitor registrations, savings, CO₂ offset and system-wide KPIs.",
+    },
   ];
 
   return (
@@ -67,7 +89,6 @@ function AdminLanding() {
 
       <div className="min-h-screen px-4 py-24">
         <div className="mx-auto max-w-5xl">
-
           {/* Hero */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -91,7 +112,8 @@ function AdminLanding() {
               transition={{ delay: 0.15 }}
               className="text-5xl md:text-6xl font-bold leading-tight mb-6"
             >
-              Platform control,<br />
+              Platform control,
+              <br />
               <span className="text-gradient-solar">all in one place</span>
             </motion.h1>
 
@@ -101,7 +123,8 @@ function AdminLanding() {
               transition={{ delay: 0.2 }}
               className="text-lg text-muted-foreground max-w-xl mx-auto mb-10"
             >
-              Manage vendors, users, schemes and analytics from a single secure dashboard. Restricted to authorized administrators only.
+              Manage vendors, users, schemes and analytics from a single secure dashboard.
+              Restricted to authorized administrators only.
             </motion.p>
 
             <motion.div
@@ -164,14 +187,15 @@ function AdminLanding() {
 // ── Login modal ───────────────────────────────────────────
 function AdminLoginModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { login } = useAdminAuth();
-  const [email, setEmail]       = useState("admin@solarwise.in");
+  const [email, setEmail] = useState("admin@solarwise.in");
   const [password, setPassword] = useState("admin123");
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(""); setLoading(true);
+    setError("");
+    setLoading(true);
     try {
       await login(email, password);
       onClose();

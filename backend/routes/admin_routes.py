@@ -4,6 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from models.admin_model import find_admin_by_id
 from models.vendor_model import update_vendor_status, find_vendor_by_id, public_vendor
+from models.cleaner_model import get_all_cleaners, update_cleaner_status, public_cleaner
 from models.scheme_model import (
     get_all_schemes, get_scheme_by_id,
     create_scheme, update_scheme, delete_scheme,
@@ -86,6 +87,31 @@ def reject_vendor(vendor_id):
     if not vendor:
         return jsonify({"error": "Vendor not found"}), 404
     return jsonify({"success": True, "message": "Vendor rejected", "data": public_vendor(vendor)}), 200
+
+
+# ── Cleaners ──────────────────────────────────────────────
+@admin_bp.route("/cleaners", methods=["GET"])
+@admin_required
+def cleaners():
+    status_filter = request.args.get("status")
+    all_cleaners = get_all_cleaners()
+    if status_filter:
+        all_cleaners = [c for c in all_cleaners if c.get("status", "pending") == status_filter]
+    
+    pub_cleaners = [public_cleaner(c) for c in all_cleaners]
+    return jsonify({"success": True, "count": len(pub_cleaners), "data": pub_cleaners}), 200
+
+@admin_bp.route("/cleaners/approve/<string:cleaner_id>", methods=["PUT"])
+@admin_required
+def approve_cleaner(cleaner_id):
+    update_cleaner_status(cleaner_id, True, "approved")
+    return jsonify({"success": True, "message": "Cleaner approved"}), 200
+
+@admin_bp.route("/cleaners/reject/<string:cleaner_id>", methods=["PUT"])
+@admin_required
+def reject_cleaner(cleaner_id):
+    update_cleaner_status(cleaner_id, False, "rejected")
+    return jsonify({"success": True, "message": "Cleaner rejected"}), 200
 
 
 # ── Schemes CRUD ──────────────────────────────────────────

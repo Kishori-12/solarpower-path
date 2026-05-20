@@ -9,6 +9,7 @@ import { Carbon } from "@/components/Carbon";
 import { EMI } from "@/components/EMI";
 import { Footer } from "@/components/Footer";
 import { Dashboard } from "@/components/Dashboard";
+import { Cleaning } from "@/components/Cleaning";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -23,7 +24,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "SolarWise – Smart Solar Advisor" },
       {
         property: "og:description",
-        content: "Solar savings calculator, PM Surya Ghar schemes, vendor comparison & ROI in one place.",
+        content:
+          "Solar savings calculator, PM Surya Ghar schemes, vendor comparison & ROI in one place.",
       },
     ],
   }),
@@ -39,6 +41,7 @@ function Index() {
         <Calculator />
         <Schemes />
         <Vendors />
+        <Cleaning />
         <Carbon />
         <EMI />
         <Dashboard />

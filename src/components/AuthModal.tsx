@@ -74,9 +74,14 @@ export function AuthModal({ open, onClose }: Props) {
               {(["login", "register"] as const).map((t) => (
                 <button
                   key={t}
-                  onClick={() => { setTab(t); setError(""); }}
+                  onClick={() => {
+                    setTab(t);
+                    setError("");
+                  }}
                   className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all capitalize ${
-                    tab === t ? "bg-gradient-solar text-primary-foreground shadow-glow" : "text-muted-foreground hover:text-foreground"
+                    tab === t
+                      ? "bg-gradient-solar text-primary-foreground shadow-glow"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {t}
@@ -135,7 +140,10 @@ export function AuthModal({ open, onClose }: Props) {
             <p className="text-center text-sm text-muted-foreground mt-4">
               {tab === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
               <button
-                onClick={() => { setTab(tab === "login" ? "register" : "login"); setError(""); }}
+                onClick={() => {
+                  setTab(tab === "login" ? "register" : "login");
+                  setError("");
+                }}
                 className="text-solar-glow font-semibold hover:underline"
               >
                 {tab === "login" ? "Register" : "Sign In"}

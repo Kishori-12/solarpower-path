@@ -21,7 +21,10 @@ async function req<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 export const adminApi = {
   login: (email: string, password: string) =>
-    req<AdminAuthResponse>("/auth/admin/login", { method: "POST", body: JSON.stringify({ email, password }) }),
+    req<AdminAuthResponse>("/auth/admin/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
 
   getAnalytics: () => req<{ data: Analytics }>("/admin/analytics"),
   getUsers: () => req<{ data: AdminUser[] }>("/admin/users"),
@@ -37,7 +40,10 @@ export const adminApi = {
   createScheme: (data: SchemeInput) =>
     req<{ data: AdminScheme }>("/admin/schemes", { method: "POST", body: JSON.stringify(data) }),
   updateScheme: (id: number, data: Partial<SchemeInput>) =>
-    req<{ data: AdminScheme }>(`/admin/schemes/${id}`, { method: "PUT", body: JSON.stringify(data) }),
+    req<{ data: AdminScheme }>(`/admin/schemes/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
   deleteScheme: (id: number) => req(`/admin/schemes/${id}`, { method: "DELETE" }),
 };
 

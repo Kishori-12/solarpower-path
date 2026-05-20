@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VendorRouteImport } from './routes/vendor'
+import { Route as CleanerRouteImport } from './routes/cleaner'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
 const VendorRoute = VendorRouteImport.update({
   id: '/vendor',
   path: '/vendor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CleanerRoute = CleanerRouteImport.update({
+  id: '/cleaner',
+  path: '/cleaner',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -32,30 +38,34 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/cleaner': typeof CleanerRoute
   '/vendor': typeof VendorRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/cleaner': typeof CleanerRoute
   '/vendor': typeof VendorRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/cleaner': typeof CleanerRoute
   '/vendor': typeof VendorRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/vendor'
+  fullPaths: '/' | '/admin' | '/cleaner' | '/vendor'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/vendor'
-  id: '__root__' | '/' | '/admin' | '/vendor'
+  to: '/' | '/admin' | '/cleaner' | '/vendor'
+  id: '__root__' | '/' | '/admin' | '/cleaner' | '/vendor'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  CleanerRoute: typeof CleanerRoute
   VendorRoute: typeof VendorRoute
 }
 
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/vendor'
       fullPath: '/vendor'
       preLoaderRoute: typeof VendorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cleaner': {
+      id: '/cleaner'
+      path: '/cleaner'
+      fullPath: '/cleaner'
+      preLoaderRoute: typeof CleanerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  CleanerRoute: CleanerRoute,
   VendorRoute: VendorRoute,
 }
 export const routeTree = rootRouteImport

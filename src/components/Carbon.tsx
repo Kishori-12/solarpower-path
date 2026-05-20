@@ -33,7 +33,8 @@ export function Carbon() {
               You save <AnimatedNumber value={4500} suffix=" kg" /> CO₂ every year
             </h2>
             <p className="mt-4 text-white/85 text-lg">
-              By switching to solar, you contribute directly to a cleaner planet — equivalent to planting hundreds of trees.
+              By switching to solar, you contribute directly to a cleaner planet — equivalent to
+              planting hundreds of trees.
             </p>
           </div>
 

@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUpRight, BadgeCheck, X, ExternalLink, IndianRupee, CheckCircle, FileText } from "lucide-react";
+import {
+  ArrowUpRight,
+  BadgeCheck,
+  X,
+  ExternalLink,
+  IndianRupee,
+  CheckCircle,
+  FileText,
+} from "lucide-react";
 
 const ALL_STATES = ["All", "Pan-India", "Maharashtra", "Gujarat", "Delhi", "Rajasthan"];
 
@@ -23,7 +31,12 @@ const schemes = [
         "Install via empanelled vendor",
         "Submit net-meter application & receive subsidy in bank account",
       ],
-      documents: ["Aadhaar Card", "Electricity Bill", "Bank Account Details", "Roof Ownership Proof"],
+      documents: [
+        "Aadhaar Card",
+        "Electricity Bill",
+        "Bank Account Details",
+        "Roof Ownership Proof",
+      ],
     },
   },
   {
@@ -44,7 +57,12 @@ const schemes = [
         "Complete installation and inspection",
         "Subsidy disbursed directly to vendor, reducing your cost",
       ],
-      documents: ["Identity Proof", "Address Proof", "Electricity Connection Certificate", "Bank Passbook"],
+      documents: [
+        "Identity Proof",
+        "Address Proof",
+        "Electricity Connection Certificate",
+        "Bank Passbook",
+      ],
     },
   },
   {
@@ -128,12 +146,17 @@ const schemes = [
         "Complete project within stipulated timeline",
         "Avail wheeling charge waiver on commissioning",
       ],
-      documents: ["Company Registration", "Project DPR", "Land Documents", "Financial Closure Proof"],
+      documents: [
+        "Company Registration",
+        "Project DPR",
+        "Land Documents",
+        "Financial Closure Proof",
+      ],
     },
   },
 ];
 
-type Scheme = typeof schemes[0];
+type Scheme = (typeof schemes)[0];
 
 export function Schemes() {
   const [filter, setFilter] = useState("All");
@@ -232,9 +255,7 @@ export function Schemes() {
                   {s.title}
                 </h3>
 
-                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                  {s.desc}
-                </p>
+                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
 
                 <motion.button
                   whileHover={{ x: 4 }}
@@ -303,15 +324,23 @@ export function Schemes() {
                   <div className="flex items-center gap-2 text-xs text-orange-500 uppercase tracking-wider mb-1 font-semibold">
                     <IndianRupee className="h-3.5 w-3.5" /> Subsidy
                   </div>
-                  <div className="text-sm font-bold text-orange-600">{selected.details.subsidy}</div>
+                  <div className="text-sm font-bold text-orange-600">
+                    {selected.details.subsidy}
+                  </div>
                 </div>
                 <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4">
-                  <div className="text-xs text-blue-500 uppercase tracking-wider mb-1 font-semibold">Capacity</div>
+                  <div className="text-xs text-blue-500 uppercase tracking-wider mb-1 font-semibold">
+                    Capacity
+                  </div>
                   <div className="text-sm font-bold text-blue-700">{selected.details.capacity}</div>
                 </div>
                 <div className="bg-green-50 border border-green-100 rounded-2xl p-4 col-span-2">
-                  <div className="text-xs text-green-600 uppercase tracking-wider mb-1 font-semibold">Key Benefit</div>
-                  <div className="text-sm font-semibold text-green-700">{selected.details.benefit}</div>
+                  <div className="text-xs text-green-600 uppercase tracking-wider mb-1 font-semibold">
+                    Key Benefit
+                  </div>
+                  <div className="text-sm font-semibold text-green-700">
+                    {selected.details.benefit}
+                  </div>
                 </div>
               </div>
 
@@ -339,7 +368,10 @@ export function Schemes() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {selected.details.documents.map((doc) => (
-                    <span key={doc} className="px-3 py-1 rounded-lg bg-gray-100 text-gray-700 text-xs font-medium border border-gray-200">
+                    <span
+                      key={doc}
+                      className="px-3 py-1 rounded-lg bg-gray-100 text-gray-700 text-xs font-medium border border-gray-200"
+                    >
                       {doc}
                     </span>
                   ))}

@@ -60,7 +60,7 @@ Use our calculator to check your eligibility!`,
 7. Get net metering connection
 8. Start generating your own power!`,
 
-  "faq": `Common Questions:
+  faq: `Common Questions:
 Q: Will solar work in rainy season?
 A: Yes, solar works year-round. Even cloudy days generate power.
 
@@ -115,7 +115,8 @@ export function Chatbot({ className = "" }: ChatbotProps) {
 
     // Find matching response
     const lowerInput = userMessage.toLowerCase();
-    let botResponse = "I'm not sure about that. Could you ask about solar benefits, cost estimation, government schemes, vendor selection, or getting started?";
+    let botResponse =
+      "I'm not sure about that. Could you ask about solar benefits, cost estimation, government schemes, vendor selection, or getting started?";
 
     for (const [key, response] of Object.entries(PREDEFINED_RESPONSES)) {
       if (lowerInput.includes(key.toLowerCase())) {
@@ -169,9 +170,7 @@ export function Chatbot({ className = "" }: ChatbotProps) {
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex ${
-                    msg.type === "user" ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
                     className={`max-w-xs px-3 py-2 rounded-lg whitespace-pre-wrap text-sm ${
@@ -201,9 +200,7 @@ export function Chatbot({ className = "" }: ChatbotProps) {
             {/* Quick Options */}
             {messages.length === 1 && !isLoading && (
               <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
-                <p className="text-xs text-gray-600 mb-2 font-medium">
-                  Quick topics:
-                </p>
+                <p className="text-xs text-gray-600 mb-2 font-medium">Quick topics:</p>
                 <div className="grid grid-cols-2 gap-2">
                   {QUICK_OPTIONS.map((option) => (
                     <button
