@@ -56,9 +56,9 @@ app.register_blueprint(recommendation_bp)
 try:
     db = get_db()
     _initialize_schemes()
-    print("✓ Firebase Firestore initialized")
+    print("[OK] Firebase Firestore initialized")
 except Exception as e:
-    print(f"⚠ Firebase initialization warning: {str(e)}")
+    print(f"[WARNING] Firebase initialization warning: {str(e)}")
     print("  Please ensure firebase-service-account.json is in the backend folder")
 
 # Load ML models on app startup

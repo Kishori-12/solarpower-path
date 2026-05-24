@@ -67,39 +67,29 @@ def _initialize_schemes():
                     "updated_at": get_ist_datetime(),
                 }
                 db.collection("schemes").document(str(scheme["id"])).set(scheme_with_timestamps)
-            print("✓ Initial schemes loaded into Firestore")
+            print("[OK] Initial schemes loaded into Firestore")
             
     except Exception as e:
-        print(f"⚠ Error initializing schemes: {str(e)}")
+        print(f"[WARNING] Error initializing schemes: {str(e)}")
 
 def get_all_schemes(active_only=False):
-    """
-    Get all schemes from Firestore.
-    
-    Args:
-        active_only (bool): If True, return only active schemes
-    
-    Returns:
-        list: List of scheme data
-    """
     try:
         db = get_db()
-        
         if active_only:
             query = db.collection("schemes").where("active", "==", True)
         else:
             query = db.collection("schemes")
-        
         docs = query.stream()
-        
         schemes = []
+        seen_names = set()
         for doc in docs:
             scheme = doc.to_dict()
             scheme["id"] = doc.id
-            schemes.append(scheme)
-        
+            name = scheme.get("name", "")
+            if name and name not in seen_names:
+                seen_names.add(name)
+                schemes.append(scheme)
         return schemes
-        
     except Exception as e:
         print(f"Error getting schemes: {str(e)}")
         return []

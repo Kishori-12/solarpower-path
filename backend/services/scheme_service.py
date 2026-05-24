@@ -1,101 +1,67 @@
+from models.scheme_model import get_all_schemes
+
+VALID_LOCATIONS = ["north", "south", "east", "west", "central"]
+
+
 def get_schemes():
-    return [
-        {
-            "id": 1,
-            "name": "PM Surya Ghar Muft Bijli Yojana",
-            "provider": "Government of India",
-            "subsidy_percent": 40,
-            "max_subsidy_inr": 78000,
-            "eligibility": "Residential households",
-            "link": "https://pmsuryaghar.gov.in"
-        },
-        {
-            "id": 2,
-            "name": "MNRE Rooftop Solar Scheme",
-            "provider": "Ministry of New and Renewable Energy",
-            "subsidy_percent": 30,
-            "max_subsidy_inr": 60000,
-            "eligibility": "Residential and commercial",
-            "link": "https://mnre.gov.in"
-        },
-        {
-            "id": 3,
-            "name": "State Solar Subsidy",
-            "provider": "State Government",
-            "subsidy_percent": 20,
-            "max_subsidy_inr": 30000,
-            "eligibility": "All categories",
-            "link": "https://example-state-solar.gov.in"
-        }
-    ]
-
-
-# ── AI-based Scheme Recommendation (using pre-trained ML model) ────
-import joblib
-import os
-
-_scheme_model = None
-_location_encoder = None
-
-def _load_scheme_model():
-    """Load the pre-trained scheme recommendation model."""
-    global _scheme_model
-    if _scheme_model is None:
-        try:
-            model_path = os.path.join(os.path.dirname(__file__), "..", "models", "scheme_recommendation_model.pkl")
-            _scheme_model = joblib.load(model_path)
-        except Exception as e:
-            raise Exception(f"Failed to load scheme recommendation model: {str(e)}")
-    return _scheme_model
-
-def _load_location_encoder():
-    """Load the location encoder for encoding location strings."""
-    global _location_encoder
-    if _location_encoder is None:
-        try:
-            encoder_path = os.path.join(os.path.dirname(__file__), "..", "models", "location_encoder.pkl")
-            _location_encoder = joblib.load(encoder_path)
-        except Exception as e:
-            raise Exception(f"Failed to load location encoder: {str(e)}")
-    return _location_encoder
+    """Return all active schemes from DB."""
+    try:
+        return get_all_schemes(active_only=True)
+    except Exception:
+        return []
 
 def recommend_scheme(location, budget, capacity):
-    """
-    Recommend a scheme using the pre-trained ML model.
-    
-    Args:
-        location (str): Location of the property (e.g., 'north', 'south', 'east', 'west', 'central')
-        budget (float): Budget available for installation in INR
-        capacity (float): Required solar system capacity in kW
-    
-    Returns:
-        dict: Prediction result with scheme recommendation
-    """
     try:
         if location is None or budget is None or capacity is None:
             raise ValueError("location, budget, and capacity are required fields")
-        
-        model = _load_scheme_model()
-        
-        # Normalize/encode location if needed
-        location_lower = str(location).lower().strip()
-        
-        # Prepare feature array for prediction
-        # Adjust feature order based on your model's training features
-        features = [[budget, capacity]]
-        
-        # Make prediction
-        prediction = model.predict(features)
-        
+
+        location = str(location).lower().strip()
+        budget   = float(budget)
+        capacity = float(capacity)
+
+        if location not in VALID_LOCATIONS:
+            location = "central"
+
+        # Rule-based scheme selection by capacity + budget
+        if capacity <= 3 and budget >= 100000:
+            scheme = {"name": "PM Surya Ghar Muft Bijli Yojana",  "subsidy_percent": 40, "subsidy": min(budget * 0.40, 78000)}
+        elif capacity <= 10 and budget >= 150000:
+            scheme = {"name": "MNRE Rooftop Solar Phase II",       "subsidy_percent": 30, "subsidy": min(budget * 0.30, 60000)}
+        elif budget >= 200000:
+            scheme = {"name": "National Solar Mission",            "subsidy_percent": 35, "subsidy": budget * 0.35}
+        else:
+            scheme = {"name": "State Subsidy Scheme",              "subsidy_percent": 20, "subsidy": budget * 0.20}
+
+        if budget >= 200000:
+            eligibility = "high"
+        elif budget >= 100000:
+            eligibility = "medium"
+        else:
+            eligibility = "emerging"
+
+        estimated_subsidy = round(scheme["subsidy"], 2)
+
         return {
             "success": True,
-            "scheme": str(prediction[0]),
-            "location": location_lower,
-            "budget": budget,
-            "capacity": capacity,
-            "confidence": "high" if hasattr(model, 'predict_proba') else "medium"
+            "recommended_scheme": scheme["name"],
+            "scheme": {
+                "name":       scheme["name"],
+                "subsidy":    estimated_subsidy,
+                "max_amount": round(estimated_subsidy * 1.2, 2),
+            },
+            "eligibility":        eligibility,
+            "subsidy_percentage": scheme["subsidy_percent"],
+            "estimated_subsidy":  estimated_subsidy,
+            "details": f"Based on your location ({location.title()}), budget (Rs.{budget:,.0f}), and {capacity} kW system, you qualify for {scheme['name']} with an estimated subsidy of Rs.{estimated_subsidy:,.0f}.",
+            "alternatives": ["PM Surya Ghar Muft Bijli Yojana", "MNRE Rooftop Solar Phase II", "State Subsidy Scheme"],
+            "next_steps": [
+                "1. Verify eligibility on official website",
+                "2. Prepare required documents",
+                "3. Submit application to nodal agency",
+                "4. Get approval and proceed with installation",
+            ],
         }
     except ValueError as e:
         return {"success": False, "error": str(e)}
     except Exception as e:
-        return {"success": False, "error": f"Model prediction failed: {str(e)}"}
+        return {"success": False, "error": f"Scheme recommendation failed: {str(e)}"}

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sun, Moon, Menu, X, Shield } from "lucide-react";
+import { Sun, Moon, Menu, X, Shield, LogIn, LogOut, User } from "lucide-react";
+import { useAuth } from "@/store/authStore";
+import { AuthModal } from "@/components/AuthModal";
 
 const links = [
   { href: "#features", label: "Features" },
@@ -21,6 +23,8 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [dark, setDark] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const { isLoggedIn, user, logout } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -34,6 +38,8 @@ export function Navbar() {
   }, [dark]);
 
   return (
+    <>
+    <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "py-2" : "py-4"}`}
     >
@@ -100,6 +106,33 @@ export function Navbar() {
 
             {/* Portal buttons — desktop */}
             <div className="hidden md:flex items-center gap-2">
+              {isLoggedIn ? (
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl glass-premium text-sm font-semibold">
+                    <User className="h-3.5 w-3.5 text-solar-glow" />
+                    <span className="text-solar-glow">{user?.name?.split(" ")[0]}</span>
+                  </div>
+                  <motion.button
+                    onClick={logout}
+                    whileHover={{ scale: 1.04, y: -1 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl glass-premium text-sm font-semibold hover:shadow-glow transition-all"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    Logout
+                  </motion.button>
+                </div>
+              ) : (
+                <motion.button
+                  onClick={() => setAuthOpen(true)}
+                  whileHover={{ scale: 1.04, y: -1 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl glass-premium text-sm font-semibold hover:shadow-glow transition-all"
+                >
+                  <LogIn className="h-3.5 w-3.5" />
+                  Login
+                </motion.button>
+              )}
               <motion.a
                 href="/vendor"
                 whileHover={{ scale: 1.04, y: -1 }}

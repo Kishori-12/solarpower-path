@@ -1,6 +1,6 @@
 """
 AI Recommendation Routes
-Provides dynamic vendor and scheme recommendations using ML models and Firestore data.
+Provides vendor and scheme recommendations.
 """
 from flask import Blueprint, request, jsonify
 import joblib
@@ -9,178 +9,165 @@ from services.vendor_service import recommend_vendors
 
 recommendation_bp = Blueprint("recommendations", __name__, url_prefix="/recommend")
 
-# Global variables to store loaded models
+vendor_model = None
 scheme_model = None
 location_encoder = None
 
 def load_models():
-    """Load ML models for scheme recommendations."""
-    global scheme_model, location_encoder
-
+    global vendor_model, scheme_model, location_encoder
     model_dir = os.path.join(os.path.dirname(__file__), "..", "models")
-
-    scheme_model_path = os.path.join(model_dir, "scheme_recommendation_model.pkl")
-    encoder_path = os.path.join(model_dir, "location_encoder.pkl")
-
     try:
-        scheme_model = joblib.load(scheme_model_path)
+        vendor_model = joblib.load(os.path.join(model_dir, "vendor_recommendation_model.pkl"))
+        print("[OK] Vendor recommendation model loaded")
+    except Exception as e:
+        print("Model loading error:", str(e))
+    try:
+        scheme_model = joblib.load(os.path.join(model_dir, "scheme_recommendation_model.pkl"))
         print("[OK] Scheme recommendation model loaded")
     except Exception as e:
-        print("Scheme model loading error:", str(e))
-
+        print("Model loading error:", str(e))
     try:
-        location_encoder = joblib.load(encoder_path)
+        location_encoder = joblib.load(os.path.join(model_dir, "location_encoder.pkl"))
         print("[OK] Location encoder loaded")
     except Exception as e:
         print("Location encoder loading error:", str(e))
 
-# Load models on import
-load_models()
-
 VALID_LOCATIONS = ["north", "south", "east", "west", "central"]
 
-# Scheme mapping from ML prediction to scheme names
-SCHEME_MAPPING = {
-    0: {
-        "name": "PM Surya Ghar Yojana",
-        "subsidy": 40,
-        "max_amount": 78000,
-        "eligibility": "Residential households"
-    },
-    1: {
-        "name": "Kusum Solar Scheme",
-        "subsidy": 30,
-        "max_amount": 60000,
-        "eligibility": "Farmers and agricultural users"
-    },
-    2: {
-        "name": "National Rooftop Solar Program",
-        "subsidy": 20,
-        "max_amount": 30000,
-        "eligibility": "All categories"
-    }
-}
 
 @recommendation_bp.route("/vendor", methods=["POST"])
 def recommend_vendor():
     try:
         data = request.get_json() or {}
-        print("VENDOR INPUT:", data)
 
-        price = data.get("price_per_kw")
-        rating = data.get("rating")
-        exp = data.get("experience_years")
+        if not all(k in data for k in ["budget", "location", "warranty"]):
+            return jsonify({"error": "Missing required fields: budget, location, warranty"}), 400
 
-        if price is None or rating is None or exp is None:
-            return jsonify({"error": "Missing vendor inputs"}), 400
+        budget   = float(data.get("budget"))
+        warranty = float(data.get("warranty"))
+        location = data.get("location", "central").lower()
 
-        location = str(data.get("location", "central")).lower()
         if location not in VALID_LOCATIONS:
             location = "central"
 
-        vendors = recommend_vendors(location)
-        if not vendors:
+        if not (20000 <= budget <= 1500000):
+            return jsonify({"error": "Budget should be between Rs.20,000 and Rs.1,500,000"}), 400
+        if not (0.5 <= warranty <= 25):
+            return jsonify({"error": "Warranty should be between 0.5 and 25 years"}), 400
+
+        all_vendors = recommend_vendors(location, budget=budget, top_n=5)
+
+        if not all_vendors:
             return jsonify({
-                "success": False,
-                "vendor_score": 0,
-                "recommendation": "No approved vendor is available for your selected location right now.",
+                "success": True,
+                "best_vendor": None,
+                "recommendation": f"No vendors found for {location.title()}. Try a different location.",
                 "confidence": "low",
-                "vendor": {"name": "No vendor available", "price_per_kw": 0, "rating": 0},
-                "factors": {"price": "N/A", "rating": "N/A", "warranty": "N/A"},
+                "all_vendors": [],
             }), 200
 
-        best_vendor = vendors[0]
-        name = best_vendor.get("company_name") or best_vendor.get("name") or "Approved Vendor"
-        price_val = best_vendor.get("price_per_kw_inr") if best_vendor.get("price_per_kw_inr") is not None else best_vendor.get("price_per_kw", 0)
-        rating_val = float(best_vendor.get("rating") or 0)
-        score_pct = round(float(best_vendor.get("score", 0)) * 100, 1)
-        confidence = "high" if best_vendor.get("location_matched") else "medium"
+        results = []
+        for v in all_vendors:
+            price      = v.get("price_per_kw_inr", 0) or 0
+            rating     = v.get("rating", 3.0) or 3.0
+            v_warranty = v.get("warranty_years", v.get("warranty", warranty))
+            within_budget = (price * 3) <= budget
+
+            results.append({
+                "name":             v.get("name", "Unknown"),
+                "price_per_kw":     price,
+                "rating":           rating,
+                "warranty":         v_warranty,
+                "location_matched": v.get("location_matched", True),
+                "within_budget":    within_budget,
+                "score":            round(v["score"] * 100, 2),
+            })
+
+        results.sort(key=lambda x: x["score"], reverse=True)
+        best = results[0]
+
+        if best["within_budget"]:
+            recommendation = f"AI recommendation: {best['name']} is the best match in {location.title()} within your budget with strong rating and warranty."
+            confidence = "high"
+        else:
+            recommendation = f"AI recommendation: {best['name']} is the top vendor in {location.title()}, but may exceed your budget. Consider adjusting."
+            confidence = "medium"
 
         return jsonify({
-            "success": True,
-            "vendor_score": score_pct,
-            "recommendation": f"Recommended approved vendor in {location.title()} based on current pricing and local approval.",
-            "confidence": confidence,
-            "vendor": {
-                "name": name,
-                "price_per_kw": price_val,
-                "rating": rating_val,
-            },
-            "factors": {
-                "price": f"₹{price_val}/kW",
-                "rating": f"{rating_val}/5",
-                "warranty": f"{exp} yrs",
-            },
-        })
+            "success":        True,
+            "best_vendor":    best,
+            "recommendation": recommendation,
+            "confidence":     confidence,
+            "all_vendors":    results,
+        }), 200
 
+    except (ValueError, TypeError) as e:
+        return jsonify({"error": f"Invalid input format: {str(e)}"}), 400
     except Exception as e:
-        print("🔥 VENDOR ERROR:", str(e))
         return jsonify({"error": str(e)}), 500
+
 
 @recommendation_bp.route("/scheme", methods=["POST"])
 def recommend_scheme():
     try:
         data = request.get_json() or {}
-        print("SCHEME INPUT:", data)
 
-        location = data.get("location")
-        budget = data.get("budget")
-        capacity = data.get("capacity")
+        if not all(k in data for k in ["location", "budget", "capacity"]):
+            return jsonify({"error": "Missing required fields: location, budget, capacity"}), 400
 
-        if not location or not budget or not capacity:
-            return jsonify({"error": "Missing scheme inputs"}), 400
+        location = data.get("location", "central").lower()
+        budget   = float(data.get("budget"))
+        capacity = float(data.get("capacity"))
 
-        location = str(location).lower()
         if location not in VALID_LOCATIONS:
             location = "central"
 
-        if scheme_model is None or location_encoder is None:
-            return jsonify({"error": "Scheme model not loaded. Please run train_models.py first."}), 503
+        if not (50000 <= budget <= 1500000):
+            return jsonify({"error": "Budget should be between Rs.50,000 and Rs.1,500,000"}), 400
+        if not (0.5 <= capacity <= 20):
+            return jsonify({"error": "Capacity should be between 0.5 and 20 kW"}), 400
 
-        # Encode location
-        loc_encoded = location_encoder.transform([location])[0]
+        # Rule-based scheme selection by capacity + budget
+        if capacity <= 3 and budget >= 100000:
+            scheme = {"name": "PM Surya Ghar Muft Bijli Yojana", "subsidy_percent": 40, "subsidy": min(budget * 0.40, 78000)}
+        elif capacity <= 10 and budget >= 150000:
+            scheme = {"name": "MNRE Rooftop Solar Phase II",      "subsidy_percent": 30, "subsidy": min(budget * 0.30, 60000)}
+        elif budget >= 200000:
+            scheme = {"name": "National Solar Mission",           "subsidy_percent": 35, "subsidy": budget * 0.35}
+        else:
+            scheme = {"name": "State Subsidy Scheme",             "subsidy_percent": 20, "subsidy": budget * 0.20}
 
-        # Create feature array
-        features = [[loc_encoded, float(budget), float(capacity)]]
-        print("Scheme prediction input:", features)
+        if budget >= 200000:
+            eligibility = "high"
+        elif budget >= 100000:
+            eligibility = "medium"
+        else:
+            eligibility = "emerging"
 
-        # Run ML prediction
-        prediction = scheme_model.predict(features)[0]
-        print("Predicted scheme index:", prediction)
-
-        # Map prediction to scheme
-        scheme_info = SCHEME_MAPPING.get(int(prediction))
-        if not scheme_info:
-            return jsonify({"error": "Invalid scheme prediction"}), 500
-
-        predicted_scheme_name = scheme_info["name"]
-        print("Predicted scheme:", predicted_scheme_name)
-
-        # Calculate estimated subsidy
-        subsidy_pct = scheme_info["subsidy"]
-        max_amount = scheme_info["max_amount"]
-        estimated_subsidy = min(max_amount, int((float(budget) * subsidy_pct) / 100))
+        estimated_subsidy = round(scheme["subsidy"], 2)
 
         return jsonify({
             "success": True,
-            "recommended_scheme": predicted_scheme_name,
+            "recommended_scheme": scheme["name"],
             "scheme": {
-                "name": predicted_scheme_name,
-                "subsidy": subsidy_pct,
-                "max_amount": max_amount,
-                "eligibility": scheme_info["eligibility"]
+                "name":       scheme["name"],
+                "subsidy":    estimated_subsidy,
+                "max_amount": round(estimated_subsidy * 1.2, 2),
             },
-            "eligibility": scheme_info["eligibility"],
-            "subsidy_percentage": subsidy_pct,
-            "estimated_subsidy": estimated_subsidy,
-            "details": f"Recommended based on ML prediction for {location} location with budget ₹{budget} and capacity {capacity}kW.",
-            "alternatives": [SCHEME_MAPPING[i]["name"] for i in SCHEME_MAPPING if i != int(prediction)],
+            "eligibility":        eligibility,
+            "subsidy_percentage": scheme["subsidy_percent"],
+            "estimated_subsidy":  estimated_subsidy,
+            "details": f"Based on your location ({location.title()}), budget (Rs.{budget:,.0f}), and {capacity} kW system, you qualify for {scheme['name']} with an estimated subsidy of Rs.{estimated_subsidy:,.0f}.",
+            "alternatives": ["PM Surya Ghar Muft Bijli Yojana", "MNRE Rooftop Solar Phase II", "State Subsidy Scheme"],
             "next_steps": [
-                "Visit the official scheme website for detailed application process.",
-                "Contact your local solar energy department for eligibility verification."
+                "1. Verify eligibility on official website",
+                "2. Prepare required documents",
+                "3. Submit application to nodal agency",
+                "4. Get approval and proceed with installation",
             ],
-        })
+        }), 200
 
+    except (ValueError, TypeError) as e:
+        return jsonify({"error": f"Invalid input format: {str(e)}"}), 400
     except Exception as e:
-        print("🔥 SCHEME ERROR:", str(e))
         return jsonify({"error": str(e)}), 500

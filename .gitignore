@@ -7,27 +7,45 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-.output
-.vinxi
+# Node
+node_modules/
+
+# Build
+dist/
+dist-ssr/
+.output/
+.vinxi/
 .tanstack/**
-.nitro
+.nitro/
+
+# Local files
 *.local
 
-# Wrangler / Cloudflare
+# Python
+__pycache__/
+*.pyc
+
+# Environment files
+.env
+backend/.env
+
+# Application logs
+backend/app_log.txt
+
+# Firebase secret
+backend/firebase-service-account.json
+
+# Cloudflare
 .wrangler/
 .dev.vars
 
-# Editor directories and files
+# Editors
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-backend/firebase-service-account.json 

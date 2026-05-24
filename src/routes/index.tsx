@@ -8,7 +8,6 @@ import { Vendors } from "@/components/Vendors";
 import { Carbon } from "@/components/Carbon";
 import { EMI } from "@/components/EMI";
 import { Footer } from "@/components/Footer";
-import { Dashboard } from "@/components/Dashboard";
 import { Cleaning } from "@/components/Cleaning";
 
 export const Route = createFileRoute("/")({
@@ -44,7 +43,6 @@ function Index() {
         <Cleaning />
         <Carbon />
         <EMI />
-        <Dashboard />
       </main>
       <Footer />
     </div>
