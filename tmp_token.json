@@ -1,0 +1,13 @@
+{
+  "data": {
+    "admin": {
+      "created_at": "2026-05-24T19:26:48.832025",
+      "email": "admin@solarwise.in",
+      "id": 1,
+      "name": "Super Admin",
+      "role": "superadmin"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc3OTY1MDgzNSwianRpIjoiODdlZmMyYTYtMWI3Mi00MGI3LTk1YTQtZGQwZGI0Y2M4ZjhlIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImFkbWluOjEiLCJuYmYiOjE3Nzk2NTA4MzUsImNzcmYiOiIwMTI3MWZmOS1jMjc5LTQ1OTUtYjk4Zi0yMDZjOGY3Mzc5ZDkiLCJleHAiOjE3Nzk3MzcyMzV9.tylXBqIQw-nNIEL_AceSTLuCAMyV40OTvceIzxKZkms"
+  },
+  "success": true
+}

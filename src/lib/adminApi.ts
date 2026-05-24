@@ -36,6 +36,7 @@ export const adminApi = {
   rejectVendor: (id: string, reason: string) =>
     req(`/admin/vendor/reject/${id}`, { method: "PUT", body: JSON.stringify({ reason }) }),
 
+  getCleanerCount: () => req<{ count: number; data: unknown[] }>("/admin/cleaners"),
   getSchemes: () => req<{ data: AdminScheme[] }>("/admin/schemes"),
   createScheme: (data: SchemeInput) =>
     req<{ data: AdminScheme }>("/admin/schemes", { method: "POST", body: JSON.stringify(data) }),
@@ -124,6 +125,7 @@ export interface Analytics {
     total_vendors: number;
     total_calculations: number;
     total_schemes: number;
+    total_cleaners: number;
     total_savings_inr: number;
     total_co2_offset_kg: number;
     avg_system_size_kw: number;

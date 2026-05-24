@@ -36,19 +36,25 @@ export function AdminVendors() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [rejectTarget, setRejectTarget] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await adminApi.getVendors(filter === "all" ? undefined : filter);
-      // treat under_review as pending on the frontend
-      const data = res.data.map((v) => ({
+      const data = (res.data ?? []).map((v) => ({
         ...v,
+        price_per_kw: v.price_per_kw ?? 0,
+        documents: v.documents ?? [],
+        doc_count: v.doc_count ?? 0,
         status: ((v.status as string) === "under_review"
           ? "pending"
           : v.status) as AdminVendor["status"],
       }));
       setVendors(data);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Failed to load vendors");
     } finally {
       setLoading(false);
     }
@@ -60,8 +66,8 @@ export function AdminVendors() {
 
   const filtered = vendors.filter(
     (v) =>
-      v.company_name.toLowerCase().includes(search.toLowerCase()) ||
-      v.email.toLowerCase().includes(search.toLowerCase()),
+      (v.company_name ?? "").toLowerCase().includes(search.toLowerCase()) ||
+      (v.email ?? "").toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleApprove = async (id: string) => {
@@ -94,7 +100,9 @@ export function AdminVendors() {
     <div>
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Vendor Verification</h1>
-        <p className="text-muted-foreground mt-1">Review and approve vendor applications</p>
+        <p className="text-muted-foreground mt-1">
+          {loading ? "Loading..." : `${vendors.length} vendor${vendors.length !== 1 ? "s" : ""} total`}
+        </p>
       </div>
 
       {/* Filters */}
@@ -176,6 +184,12 @@ export function AdminVendors() {
         )}
       </AnimatePresence>
 
+      {error && (
+        <div className="mb-4 text-sm text-red-400 bg-red-400/10 rounded-xl px-4 py-3">
+          {error}
+        </div>
+      )}
+
       {/* Vendor list */}
       {loading ? (
         <div className="space-y-3">
@@ -214,7 +228,7 @@ export function AdminVendors() {
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold truncate">{v.company_name}</div>
                     <div className="text-sm text-muted-foreground">
-                      {v.email} · {v.location} · ₹{v.price_per_kw.toLocaleString("en-IN")}/kW
+                      {v.email} · {v.location || "—"} · ₹{(v.price_per_kw ?? 0).toLocaleString("en-IN")}/kW
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -274,14 +288,29 @@ export function AdminVendors() {
                       exit={{ height: 0, opacity: 0 }}
                       className="border-t border-border/30 px-5 pb-5 pt-4 overflow-hidden"
                     >
+                      {/* Vendor details */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                        {[
+                          { label: "Phone", value: v.phone || "—" },
+                          { label: "Experience", value: v.experience_years ? `${v.experience_years} yrs` : "—" },
+                          { label: "Rating", value: v.rating ? `${v.rating} ★` : "No rating" },
+                          { label: "Joined", value: v.created_at ? v.created_at.split("T")[0] : "—" },
+                        ].map(({ label, value }) => (
+                          <div key={label} className="glass-premium rounded-xl px-3 py-2">
+                            <div className="text-xs text-muted-foreground">{label}</div>
+                            <div className="text-sm font-semibold mt-0.5">{value}</div>
+                          </div>
+                        ))}
+                      </div>
+
                       <div className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-3">
                         Uploaded Documents
                       </div>
-                      {v.documents.length === 0 ? (
+                      {(v.documents ?? []).length === 0 ? (
                         <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
                       ) : (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                          {v.documents.map((doc) => (
+                          {(v.documents ?? []).map((doc) => (
                             <a
                               key={doc.id}
                               href={doc.filename}
@@ -299,7 +328,7 @@ export function AdminVendors() {
                                 {doc.original_name}
                               </div>
                               <div className="text-xs text-muted-foreground">
-                                {(doc.file_size / 1024).toFixed(1)} KB
+                                {doc.file_size ? `${(doc.file_size / 1024).toFixed(1)} KB` : "—"}
                               </div>
                               <div className="text-xs text-solar-glow mt-1 font-semibold">
                                 Click to view ↗

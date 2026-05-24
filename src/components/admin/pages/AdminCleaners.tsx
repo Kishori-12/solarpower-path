@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Check, X, Droplets, Loader2 } from "lucide-react";
-import { useAdminAuth } from "@/store/adminAuthStore";
 
 interface Cleaner {
   id: string;
@@ -74,7 +73,12 @@ export function AdminCleaners() {
     }
   };
 
-  const filtered = filter === "all" ? cleaners : cleaners.filter((c) => (c.status || "pending") === filter);
+  const filtered =
+    filter === "all"
+      ? cleaners
+      : filter === "pending"
+        ? cleaners.filter((c) => c.status === "pending" || c.status === "under_review")
+        : cleaners.filter((c) => c.status === filter);
 
   return (
     <div className="space-y-6">

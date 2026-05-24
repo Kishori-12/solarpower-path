@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Users, Building2, Zap, IndianRupee, Leaf, TrendingUp, Clock } from "lucide-react";
+import { Users, Building2, Zap, IndianRupee, Leaf, TrendingUp, Clock, Droplets, FileText } from "lucide-react";
 import { adminApi, Analytics } from "@/lib/adminApi";
 
 export function AdminDashboard() {
@@ -31,6 +31,20 @@ export function AdminDashboard() {
       icon: Building2,
       color: "text-purple-400",
       bg: "bg-purple-400/10",
+    },
+    {
+      label: "Total Cleaners",
+      value: ov?.total_cleaners ?? 0,
+      icon: Droplets,
+      color: "text-cyan-400",
+      bg: "bg-cyan-400/10",
+    },
+    {
+      label: "Total Schemes",
+      value: ov?.total_schemes ?? 0,
+      icon: FileText,
+      color: "text-indigo-400",
+      bg: "bg-indigo-400/10",
     },
     {
       label: "Calculations",

@@ -34,13 +34,23 @@ const NAV = [
 export function AdminLayout({ page, onNavigate, children }: Props) {
   const { admin, logout } = useAdminAuth();
   const [pendingCount, setPendingCount] = useState(0);
+  const [pendingCleaners, setPendingCleaners] = useState(0);
 
   useEffect(() => {
     adminApi
       .getAnalytics()
       .then((r) => setPendingCount(r.data.vendor_status.pending ?? 0))
       .catch(() => {});
-  }, [page]); // re-fetch whenever page changes so count stays fresh
+    adminApi
+      .getCleanerCount()
+      .then((r) => {
+        const pending = (r.data as Array<{ status: string }>).filter(
+          (c) => c.status === "pending" || c.status === "under_review",
+        ).length;
+        setPendingCleaners(pending);
+      })
+      .catch(() => {});
+  }, [page]);
 
   return (
     <div className="flex min-h-screen">
@@ -86,6 +96,15 @@ export function AdminLayout({ page, onNavigate, children }: Props) {
                     }`}
                   >
                     {pendingCount}
+                  </span>
+                )}
+                {key === "cleaners" && pendingCleaners > 0 && (
+                  <span
+                    className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
+                      active ? "bg-white/20 text-white" : "bg-orange-500 text-white"
+                    }`}
+                  >
+                    {pendingCleaners}
                   </span>
                 )}
                 {active && <ChevronRight className="h-3 w-3" />}
